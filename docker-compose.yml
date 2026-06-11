@@ -1,0 +1,75 @@
+# docker-compose.yml
+# [KIẾN THỨC] Docker Compose:
+# Định nghĩa và chạy nhiều containers cùng lúc như 1 application
+# - services: danh sách containers cần chạy
+# - volumes: persistent storage (data không mất khi container restart)
+# - networks: internal network cho containers giao tiếp với nhau
+#
+# Lệnh:
+#   docker compose up -d        → start tất cả services (detached/background)
+#   docker compose down         → stop và xóa containers
+#   docker compose logs -f api  → xem logs của service cụ thể
+#   docker compose ps           → xem trạng thái các services
+
+services:
+  # ===== SQL Server =====
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dineflow-sqlserver
+    environment:
+      SA_PASSWORD: "YourPassword@123"        # Phải match ConnectionString
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"                 # Free Developer edition
+    ports:
+      - "1433:1433"                          # host:container
+    volumes:
+      - sqlserver_data:/var/opt/mssql        # Persist database files
+    restart: unless-stopped
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourPassword@123" -Q "SELECT 1" -b
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s                      # Cho SQL Server khởi động
+
+  # ===== Redis =====
+  # [KIẾN THỨC] Redis Alpine: image nhỏ hơn (~30MB vs ~100MB), dùng cho production
+  redis:
+    image: redis:7-alpine
+    container_name: dineflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data                     # Persist cache (optional)
+    command: redis-server --save 60 1 --loglevel warning
+    # --save 60 1: snapshot mỗi 60s nếu có ít nhất 1 thay đổi (RDB persistence)
+    # --loglevel warning: giảm noise logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ===== Redis Commander (Web UI cho Redis - Development only) =====
+  redis-ui:
+    image: rediscommander/redis-commander:latest
+    container_name: dineflow-redis-ui
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+    ports:
+      - "8081:8081"                          # Truy cập: http://localhost:8081
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - tools                                # Chỉ start khi dùng: docker compose --profile tools up
+
+# ===== Named Volumes =====
+# Được Docker quản lý → data persist ngay cả khi container bị xóa
+volumes:
+  sqlserver_data:
+    name: dineflow_sqlserver_data
+  redis_data:
+    name: dineflow_redis_data

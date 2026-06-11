@@ -124,6 +124,25 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ===== Health Checks =====
+// [KIẾN THỨC] Health Checks:
+// Endpoint /health trả về trạng thái của các dependencies (DB, Cache, etc.)
+// Dùng cho: Kubernetes liveness/readiness probe, load balancer, monitoring
+// Status: Healthy | Degraded | Unhealthy
+var sqlConnectionString  = builder.Configuration.GetConnectionString("SqlServer")!;
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+
+builder.Services
+    .AddHealthChecks()
+    .AddSqlServer(
+        connectionString: sqlConnectionString,
+        name:             "sqlserver",
+        tags:             ["db", "sql", "ready"])
+    .AddRedis(
+        redisConnectionString: redisConnectionString,
+        name:                  "redis",
+        tags:                  ["cache", "redis", "ready"]);
+
 // =============================================
 // Build app và cấu hình Middleware Pipeline
 // [KIẾN THỨC] Thứ tự middleware RẤT QUAN TRỌNG:
@@ -163,6 +182,24 @@ app.UseAuthorization();
 
 // 7. Route controllers
 app.MapControllers();
+
+// 8. Health Check endpoints
+// GET /health         → trạng thái tổng hợp (Healthy/Unhealthy)
+// GET /health/ready   → chỉ check "ready" tagged dependencies (SQL + Redis)
+// GET /health/live    → luôn Healthy nếu app đang chạy (process alive check)
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = HealthCheckResponseWriter.WriteJson
+});
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate      = hc => hc.Tags.Contains("ready"),
+    ResponseWriter = HealthCheckResponseWriter.WriteJson
+});
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false  // Không check dependency nào → luôn Healthy nếu app đang chạy
+});
 
 // ===== Auto Migration (Development only) =====
 if (app.Environment.IsDevelopment())

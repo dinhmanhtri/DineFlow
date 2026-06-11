@@ -1,6 +1,6 @@
 # 🍽️ DineFlow — Restaurant Management System
 
-> Fullstack web application quản lý nhà hàng, xây dựng theo **Clean Architecture** với ASP.NET Core 8.
+> Fullstack web application quản lý nhà hàng, xây dựng theo **Clean Architecture** với ASP.NET Core 10.
 
 [![CI](https://github.com/dinhmanhtri/DineFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/dinhmanhtri/DineFlow/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -72,15 +72,30 @@ docker-compose up --build
 - API: http://localhost:5000/swagger
 - Web: http://localhost:3000
 
-### Run locally
+### Run locally (Development)
+
 ```bash
-# Update connection strings trong appsettings.json
+# 1. Start SQL Server + Redis bằng Docker
+docker compose up -d sqlserver redis
 
-dotnet ef database update --project src/DineFlow.Infrastructure --startup-project src/DineFlow.API
+# 2. Restore frontend libraries
+cd src/DineFlow.Web && libman restore && cd ../..
 
+# 3. Chạy API
 dotnet run --project src/DineFlow.API
+
+# 4. Chạy MVC Web
 dotnet run --project src/DineFlow.Web
 ```
+
+### API Endpoints
+
+| Endpoint | Mô tả |
+|---|---|
+| `GET /swagger` | Swagger UI (Development only) |
+| `GET /health` | Tổng hợp trạng thái SQL + Redis |
+| `GET /health/ready` | Readiness probe (Kubernetes) |
+| `GET /health/live` | Liveness probe (Kubernetes) |
 
 ---
 
@@ -97,12 +112,12 @@ dotnet run --project src/DineFlow.Web
 | Phase | Status | Nội dung |
 |---|---|---|
 | Phase 1 | ✅ Done | Solution Setup + Domain Layer |
-| Phase 2 | ✅ Done | Infrastructure: EF Core, Repository, Redis |
+| Phase 2 | ✅ Done | Infrastructure: EF Core, Repository, UnitOfWork |
 | Phase 3 | ✅ Done | Application Services + DTOs + AutoMapper |
-| Phase 4 | 🔄 In Progress | Web API + JWT + Swagger |
-| Phase 5 | ⬜ Todo | MVC Razor Views |
-| Phase 6 | ⬜ Todo | Docker + Docker Compose |
-| Phase 7 | ⬜ Todo | CI/CD GitHub Actions |
+| Phase 4 | ✅ Done | Web API + JWT + Swagger + Global Error Handler |
+| Phase 5 | ✅ Done | Redis Cache + Docker Compose + Health Checks |
+| Phase 6 | ⏳ Next | MVC Razor Views (DineFlow.Web) |
+| Phase 7 | ◻️ Todo | Dockerfile + CI/CD GitHub Actions |
 
 ---
 

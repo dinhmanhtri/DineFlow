@@ -35,4 +35,26 @@ public interface ICacheService
     /// Xóa nhiều cache keys theo pattern (dùng wildcard: "menu:*")
     /// </summary>
     Task RemoveByPatternAsync(string pattern);
+
+    /// <summary>
+    /// Cache-Aside pattern trong 1 dòng code:
+    /// Tự động get từ cache → miss → gọi factory → write cache → return
+    /// 
+    /// [KIẾN THỨC] Func&lt;Task&lt;T&gt;&gt; factory:
+    /// Truyền vào 1 async delegate (lambda) sẽ chỉ được gọi khi cache miss.
+    /// → Không query DB nếu cache hit (lazy evaluation)
+    /// 
+    /// Ví dụ dùng:
+    ///   var data = await cache.GetOrSetAsync(
+    ///       "menu:items:all",
+    ///       () => unitOfWork.Menus.GetAllWithCategoryAsync(),
+    ///       TimeSpan.FromMinutes(10));
+    /// </summary>
+    Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiry = null)
+        where T : class;
+
+    /// <summary>
+    /// Kiểm tra Redis có đang online không (dùng cho Health Check)
+    /// </summary>
+    Task<bool> PingAsync();
 }
