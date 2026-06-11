@@ -49,7 +49,7 @@ public class AuthController(
         }
 
         // Lưu JWT và user info vào Session
-        HttpContext.Session.SetString(SessionKeyToken,    response.Token);
+        HttpContext.Session.SetString(SessionKeyToken,    response.AccessToken);
         HttpContext.Session.SetString(SessionKeyFullName, response.FullName);
         HttpContext.Session.SetString(SessionKeyRole,     response.Role);
         HttpContext.Session.SetString(SessionKeyEmail,    response.Email);

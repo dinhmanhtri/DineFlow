@@ -17,7 +17,10 @@ public interface IAuthApiClient
     Task<LoginResponse?> LoginAsync(string email, string password);
 }
 
-public record LoginResponse(string Token, string Email, string FullName, string Role, DateTime ExpiresAt);
+/// [KIẾN THỨC] AccessToken phải khớp với tên field trong JSON response của API:
+/// API trả về: { "accessToken": "...", "expiresAt": ..., "fullName": ..., "email": ..., "role": ... }
+/// → PropertyNameCaseInsensitive = true sẽ map đúng kể cả Pascal/Camel case
+public record LoginResponse(string AccessToken, string Email, string FullName, string Role, DateTime ExpiresAt);
 
 public class AuthApiClient(HttpClient httpClient) : IAuthApiClient
 {
@@ -28,18 +31,20 @@ public class AuthApiClient(HttpClient httpClient) : IAuthApiClient
 
     public async Task<LoginResponse?> LoginAsync(string email, string password)
     {
+        // [KIẾN THỨC] Serialize với CamelCase để API nhận đúng field names
         var payload = new { email, password };
-        var content = new StringContent(
-            JsonSerializer.Serialize(payload),
-            Encoding.UTF8,
-            "application/json");
+        var json    = JsonSerializer.Serialize(payload, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await httpClient.PostAsync("api/auth/login", content);
 
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var json = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<LoginResponse>(json, JsonOptions);
+        var responseJson = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<LoginResponse>(responseJson, JsonOptions);
     }
 }
