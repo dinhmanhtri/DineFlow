@@ -28,6 +28,7 @@ public interface IUnitOfWork : IDisposable
     IMenuRepository Menus { get; }
     IOrderRepository Orders { get; }
     ITableRepository Tables { get; }
+    IStaffRepository Staff { get; }
 
     // ===== Transaction =====
 

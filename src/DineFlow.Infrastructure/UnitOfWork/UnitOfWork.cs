@@ -37,6 +37,7 @@ public class UnitOfWork : IUnitOfWork
     private IMenuRepository? _menus;
     private IOrderRepository? _orders;
     private ITableRepository? _tables;
+    private IStaffRepository? _staff;
 
     public UnitOfWork(DineFlowDbContext context)
     {
@@ -47,6 +48,7 @@ public class UnitOfWork : IUnitOfWork
     public IMenuRepository  Menus  => _menus  ??= new MenuRepository(_context);
     public IOrderRepository Orders => _orders ??= new OrderRepository(_context);
     public ITableRepository Tables => _tables ??= new TableRepository(_context);
+    public IStaffRepository Staff  => _staff  ??= new StaffRepository(_context);
 
     // ===== Transaction Management =====
 

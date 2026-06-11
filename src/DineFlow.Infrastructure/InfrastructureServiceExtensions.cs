@@ -77,6 +77,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IAuthService, AuthService>();
+
 
         // ===== AutoMapper v16+ =====
         // [KIẾN THỨC] AutoMapper v16: AddAutoMapper(Assembly) không còn cần package riêng
