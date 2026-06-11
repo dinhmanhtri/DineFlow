@@ -17,20 +17,20 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: dineflow-sqlserver
     environment:
-      SA_PASSWORD: "YourPassword@123"        # Phải match ConnectionString
+      SA_PASSWORD: "beevn" # Phải match ConnectionString
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Developer"                 # Free Developer edition
+      MSSQL_PID: "Developer" # Free Developer edition
     ports:
-      - "1433:1433"                          # host:container
+      - "1433:1433" # host:container
     volumes:
-      - sqlserver_data:/var/opt/mssql        # Persist database files
+      - sqlserver_data:/var/opt/mssql # Persist database files
     restart: unless-stopped
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourPassword@123" -Q "SELECT 1" -b
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "beevn" -Q "SELECT 1" -b
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s                      # Cho SQL Server khởi động
+      start_period: 30s # Cho SQL Server khởi động
 
   # ===== Redis =====
   # [KIẾN THỨC] Redis Alpine: image nhỏ hơn (~30MB vs ~100MB), dùng cho production
@@ -40,7 +40,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data                     # Persist cache (optional)
+      - redis_data:/data # Persist cache (optional)
     command: redis-server --save 60 1 --loglevel warning
     # --save 60 1: snapshot mỗi 60s nếu có ít nhất 1 thay đổi (RDB persistence)
     # --loglevel warning: giảm noise logs
@@ -58,13 +58,13 @@ services:
     environment:
       REDIS_HOSTS: "local:redis:6379"
     ports:
-      - "8081:8081"                          # Truy cập: http://localhost:8081
+      - "8081:8081" # Truy cập: http://localhost:8081
     depends_on:
       redis:
         condition: service_healthy
     restart: unless-stopped
     profiles:
-      - tools                                # Chỉ start khi dùng: docker compose --profile tools up
+      - tools # Chỉ start khi dùng: docker compose --profile tools up
 
 # ===== Named Volumes =====
 # Được Docker quản lý → data persist ngay cả khi container bị xóa
