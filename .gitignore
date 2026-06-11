@@ -70,3 +70,8 @@ desktop.ini
 .vscode/
 !.vscode/extensions.json
 !.vscode/settings.json
+
+## Frontend Libraries (LibMan / npm)
+# Các thư viện frontend được restore bằng: dotnet tool run libman restore
+# hoặc: libman restore
+**/wwwroot/lib/
