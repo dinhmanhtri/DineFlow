@@ -1,0 +1,87 @@
+@model DineFlow.Web.Models.LoginViewModel
+@{
+    Layout = null; // Login page không dùng Layout chính
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập — DineFlow</title>
+    <meta name="description" content="Đăng nhập vào hệ thống quản lý nhà hàng DineFlow" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<div class="login-page">
+    <div class="login-card">
+
+        <!-- Brand -->
+        <div class="login-brand">
+            <div class="brand-icon">🍽️</div>
+            <h1>DineFlow</h1>
+            <p>Đăng nhập để quản lý nhà hàng</p>
+        </div>
+
+        <!-- Error messages -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="login-error">
+                ⚠️
+                <span>
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        @error.ErrorMessage <br />
+                    }
+                </span>
+            </div>
+        }
+
+        <!-- Login Form -->
+        <form asp-controller="Auth" asp-action="Login" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+            <div class="form-group">
+                <label class="form-label" for="Email">
+                    Email <span class="required">*</span>
+                </label>
+                <input asp-for="Email"
+                       id="Email"
+                       class="form-control"
+                       type="email"
+                       placeholder="admin@dineflow.com"
+                       autocomplete="email"
+                       autofocus />
+                <span asp-validation-for="Email" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="Password">
+                    Mật khẩu <span class="required">*</span>
+                </label>
+                <input asp-for="Password"
+                       id="Password"
+                       class="form-control"
+                       type="password"
+                       placeholder="••••••••"
+                       autocomplete="current-password" />
+                <span asp-validation-for="Password" class="field-validation-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;padding:12px;">
+                🔑 Đăng nhập
+            </button>
+        </form>
+
+        <!-- Default credentials hint (dev only) -->
+        <div style="margin-top:24px;padding:12px;background:var(--bg-hover);border-radius:var(--radius-sm);font-size:12px;color:var(--text-muted);text-align:center;">
+            <strong style="color:var(--text-secondary)">Demo:</strong>
+            admin@dineflow.com / Admin@123
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

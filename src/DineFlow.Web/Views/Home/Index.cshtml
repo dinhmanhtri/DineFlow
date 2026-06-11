@@ -1,8 +1,100 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model DineFlow.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"]    = "Dashboard";
+    ViewData["Subtitle"] = "Tổng quan hệ thống";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- KPI Cards -->
+<div class="kpi-grid">
+
+    <div class="kpi-card">
+        <div class="kpi-icon amber">🍜</div>
+        <div>
+            <div class="kpi-value">@Model.TotalMenuItems</div>
+            <div class="kpi-label">Tổng món ăn</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon green">✅</div>
+        <div>
+            <div class="kpi-value">@Model.AvailableItems</div>
+            <div class="kpi-label">Đang bán</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon red">🚫</div>
+        <div>
+            <div class="kpi-value">@Model.UnavailableItems</div>
+            <div class="kpi-label">Tạm ngừng</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon blue">📋</div>
+        <div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-label">Đơn hôm nay</div>
+        </div>
+    </div>
+
 </div>
+
+<!-- Quick Links -->
+<div class="card">
+    <div class="card-header">
+        <div>
+            <div class="card-title">Truy cập nhanh</div>
+            <div class="card-subtitle">Các chức năng thường dùng</div>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
+
+        <a href="/Menu" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);transition:all var(--transition);color:var(--text-secondary);"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
+            <span style="font-size:24px;">🍜</span>
+            <div>
+                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Quản lý thực đơn</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Thêm, sửa, xóa món</div>
+            </div>
+        </a>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);opacity:0.5;cursor:not-allowed;">
+            <span style="font-size:24px;">🪑</span>
+            <div>
+                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Quản lý bàn</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sắp có — Phase 7</div>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);opacity:0.5;cursor:not-allowed;">
+            <span style="font-size:24px;">📋</span>
+            <div>
+                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Đơn hàng</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sắp có — Phase 7</div>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);opacity:0.5;cursor:not-allowed;">
+            <span style="font-size:24px;">🧾</span>
+            <div>
+                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Hóa đơn</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sắp có — Phase 7</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast from TempData -->
+@if (TempData["Success"] is string successMsg)
+{
+    <script>document.addEventListener('DOMContentLoaded', () => showToast('@Html.Raw(successMsg)', 'success'));</script>
+}
+@if (TempData["Error"] is string errorMsg)
+{
+    <script>document.addEventListener('DOMContentLoaded', () => showToast('@Html.Raw(errorMsg)', 'error'));</script>
+}

@@ -1,0 +1,167 @@
+@model DineFlow.Web.Models.MenuIndexViewModel
+@{
+    ViewData["Title"]    = "Thực đơn";
+    ViewData["Subtitle"] = "Quản lý danh sách món ăn";
+}
+
+<!-- Toast notifications từ TempData -->
+@if (TempData["Success"] is string successMsg)
+{
+    <script>document.addEventListener('DOMContentLoaded', () => showToast('@Html.Raw(successMsg)', 'success'));</script>
+}
+@if (TempData["Error"] is string errorMsg)
+{
+    <script>document.addEventListener('DOMContentLoaded', () => showToast('@Html.Raw(errorMsg)', 'error'));</script>
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h1>🍜 Thực đơn</h1>
+        <p>@Model.TotalCount món ăn • Lọc và quản lý toàn bộ thực đơn</p>
+    </div>
+    <a class="btn btn-primary" href="/Menu/Create">
+        ＋ Thêm món mới
+    </a>
+</div>
+
+<!-- Filter / Search -->
+<div class="card" style="margin-bottom:20px;padding:16px 20px;">
+    <form method="get" action="/Menu" class="search-bar">
+        <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text"
+                   name="search"
+                   value="@Model.SearchTerm"
+                   class="form-control"
+                   placeholder="Tìm theo tên, mô tả..." />
+        </div>
+
+        @if (Model.Categories.Any())
+        {
+            <select name="categoryId" class="form-control" style="width:180px;flex-shrink:0;">
+                <option value="">Tất cả danh mục</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id)">@cat.Name</option>
+                }
+            </select>
+        }
+
+        <button type="submit" class="btn btn-secondary">Lọc</button>
+        @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.CategoryId.HasValue)
+        {
+            <a class="btn btn-ghost" href="/Menu">✕ Bỏ lọc</a>
+        }
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card" style="padding:0;">
+    @if (!Model.Items.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🍽️</div>
+            <h3>Chưa có món ăn nào</h3>
+            <p>@(string.IsNullOrEmpty(Model.SearchTerm) ? "Bắt đầu bằng cách thêm món ăn đầu tiên." : "Không tìm thấy kết quả phù hợp.")</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="df-table">
+                <thead>
+                    <tr>
+                        <th>Món ăn</th>
+                        <th>Danh mục</th>
+                        <th>Giá</th>
+                        <th>Trạng thái</th>
+                        <th style="text-align:right;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <!-- Ảnh + Tên -->
+                            <td>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="item-img" onerror="this.style.display='none'" />
+                                    }
+                                    else
+                                    {
+                                        <div class="item-img-placeholder">🍽️</div>
+                                    }
+                                    <div>
+                                        <div class="item-name">@item.Name</div>
+                                        @if (!string.IsNullOrEmpty(item.Description))
+                                        {
+                                            <div class="item-desc" title="@item.Description">@item.Description</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Danh mục -->
+                            <td>
+                                <span class="badge badge-info">@item.CategoryName</span>
+                            </td>
+
+                            <!-- Giá -->
+                            <td>
+                                <span class="price">@item.Price.ToString("N0") ₫</span>
+                            </td>
+
+                            <!-- Trạng thái -->
+                            <td>
+                                @if (item.IsAvailable)
+                                {
+                                    <span class="badge badge-success">● Đang bán</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">● Tạm ngừng</span>
+                                }
+                            </td>
+
+                            <!-- Actions -->
+                            <td>
+                                <div class="actions-cell" style="justify-content:flex-end;">
+
+                                    <!-- Toggle availability -->
+                                    <form id="toggle-form-@item.Id" asp-controller="Menu" asp-action="Toggle"
+                                          asp-route-id="@item.Id" method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-ghost btn-sm"
+                                                title="@(item.IsAvailable ? "Tạm ngừng" : "Kích hoạt")">
+                                            @(item.IsAvailable ? "⏸" : "▶")
+                                        </button>
+                                    </form>
+
+                                    <!-- Edit -->
+                                    <a class="btn btn-ghost btn-sm" href="/Menu/Edit/@item.Id" title="Chỉnh sửa">✏️</a>
+
+                                    <!-- Delete -->
+                                    <form id="delete-form-@item.Id" asp-controller="Menu" asp-action="Delete"
+                                          asp-route-id="@item.Id" method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                    </form>
+                                    <button class="btn btn-ghost btn-sm"
+                                            style="color:var(--danger);"
+                                            onclick="confirmDelete('delete-form-@item.Id', '@item.Name')"
+                                            title="Xóa">
+                                        🗑
+                                    </button>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

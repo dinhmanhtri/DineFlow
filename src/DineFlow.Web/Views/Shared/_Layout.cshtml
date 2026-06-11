@@ -1,50 +1,132 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DineFlow.Web</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] — DineFlow</title>
+    <meta name="description" content="DineFlow — Hệ thống quản lý nhà hàng hiện đại" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DineFlow.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">DineFlow.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+
+<div class="app-shell">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar" id="sidebar">
+
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <div class="brand-icon">🍽️</div>
+            <div>
+                <div class="brand-name">DineFlow</div>
+                <div class="brand-tagline">Restaurant Manager</div>
             </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Tổng quan</div>
+            <a class="nav-item" href="/" id="nav-home">
+                <span class="nav-icon">📊</span>
+                Dashboard
+            </a>
+
+            <div class="nav-section-label" style="margin-top:8px;">Quản lý</div>
+            <a class="nav-item" href="/Menu" id="nav-menu">
+                <span class="nav-icon">🍜</span>
+                Thực đơn
+            </a>
+            <a class="nav-item" href="/Tables" id="nav-tables">
+                <span class="nav-icon">🪑</span>
+                Bàn ăn
+                <span class="nav-badge" style="background:var(--text-muted);color:var(--bg-primary)">Soon</span>
+            </a>
+            <a class="nav-item" href="/Orders" id="nav-orders">
+                <span class="nav-icon">📋</span>
+                Đơn hàng
+                <span class="nav-badge" style="background:var(--text-muted);color:var(--bg-primary)">Soon</span>
+            </a>
+            <a class="nav-item" href="/Invoices" id="nav-invoices">
+                <span class="nav-icon">🧾</span>
+                Hóa đơn
+                <span class="nav-badge" style="background:var(--text-muted);color:var(--bg-primary)">Soon</span>
+            </a>
+
+            <div class="nav-section-label" style="margin-top:8px;">Hệ thống</div>
+            <a class="nav-item" href="/Auth/Staff" id="nav-staff">
+                <span class="nav-icon">👥</span>
+                Nhân viên
+                <span class="nav-badge" style="background:var(--text-muted);color:var(--bg-primary)">Soon</span>
+            </a>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        <!-- User Footer -->
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">
+                    @{
+                        var fullName = Context.Session.GetString("user_fullname") ?? "U";
+                        var initials = fullName.Length > 0 ? fullName[0].ToString().ToUpper() : "U";
+                    }
+                    @initials
+                </div>
+                <div class="user-info">
+                    <div class="user-name">@fullName</div>
+                    <div class="user-role">@(Context.Session.GetString("user_role") ?? "")</div>
+                </div>
+                <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-logout" title="Đăng xuất">⎋</button>
+                </form>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ===== Main Content ===== -->
+    <div class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <div>
+                <div class="topbar-title">@(ViewData["Title"] ?? "Dashboard")</div>
+                <div class="topbar-subtitle">@(ViewData["Subtitle"] ?? "DineFlow Restaurant Management")</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:12px;color:var(--text-muted);">
+                    @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                </span>
+            </div>
+        </header>
+
+        <!-- Page -->
+        <main class="page-content">
             @RenderBody()
         </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - DineFlow.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </div>
+</div>
+
+<!-- ===== Toast Container ===== -->
+<div id="toast-container"></div>
+
+<!-- ===== Delete Confirm Modal ===== -->
+<div class="modal-overlay" id="delete-modal">
+    <div class="modal-box">
+        <div class="modal-title">⚠️ Xác nhận xóa</div>
+        <div class="modal-body">
+            Bạn có chắc muốn xóa <strong id="delete-item-name"></strong>?
+            <br>Hành động này không thể hoàn tác.
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Hủy</button>
+            <button class="btn btn-danger" onclick="executeDelete()">Xóa</button>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

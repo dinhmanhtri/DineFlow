@@ -1,0 +1,110 @@
+@model DineFlow.Web.Models.MenuItemFormViewModel
+@{
+    ViewData["Title"]    = "Thêm món mới";
+    ViewData["Subtitle"] = "Thêm món ăn vào thực đơn";
+}
+
+<div class="page-header">
+    <div>
+        <h1>➕ Thêm món mới</h1>
+        <p>Điền thông tin để thêm món ăn vào thực đơn</p>
+    </div>
+    <a class="btn btn-secondary" href="/Menu">← Quay lại</a>
+</div>
+
+<div class="card" style="max-width:700px;">
+
+    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+    <form asp-controller="Menu" asp-action="Create" method="post" novalidate>
+        @Html.AntiForgeryToken()
+
+        <!-- Name + Price -->
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" asp-for="Name">
+                    Tên món ăn <span class="required">*</span>
+                </label>
+                <input asp-for="Name" class="form-control" placeholder="Phở bò đặc biệt" autofocus />
+                <span asp-validation-for="Name" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Price">
+                    Giá (VND) <span class="required">*</span>
+                </label>
+                <input asp-for="Price" class="form-control" type="number" min="0" step="1000" placeholder="85000" />
+                <span asp-validation-for="Price" class="field-validation-error"></span>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            <label class="form-label" asp-for="Description">Mô tả</label>
+            <textarea asp-for="Description" class="form-control" rows="3"
+                      placeholder="Phở bò truyền thống với nước dùng hầm 12 tiếng..."></textarea>
+            <span asp-validation-for="Description" class="field-validation-error"></span>
+        </div>
+
+        <!-- Category + Available -->
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" asp-for="CategoryId">
+                    Danh mục <span class="required">*</span>
+                </label>
+                @if (Model.Categories.Any())
+                {
+                    <select asp-for="CategoryId" class="form-control">
+                        <option value="">-- Chọn danh mục --</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <div style="padding:10px 14px;background:var(--warning-bg);border-radius:var(--radius-sm);font-size:13px;color:var(--warning);">
+                        ⚠️ Chưa có danh mục. Vui lòng tạo danh mục trước.
+                    </div>
+                    <input type="hidden" asp-for="CategoryId" />
+                }
+                <span asp-validation-for="CategoryId" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Trạng thái</label>
+                <div style="display:flex;align-items:center;height:42px;">
+                    <label class="form-check">
+                        <input asp-for="IsAvailable" type="checkbox" />
+                        <span style="font-size:13px;color:var(--text-secondary);">Đang bán (hiển thị cho khách)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image URL -->
+        <div class="form-group">
+            <label class="form-label" asp-for="ImageUrl">URL hình ảnh</label>
+            <input asp-for="ImageUrl" id="ImageUrl" class="form-control"
+                   placeholder="https://example.com/pho-bo.jpg" />
+            <span asp-validation-for="ImageUrl" class="field-validation-error"></span>
+            <div id="img-preview" style="margin-top:10px;display:none;">
+                <img src="" alt="Preview" style="width:80px;height:80px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);" />
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--border);margin-top:4px;">
+            <a class="btn btn-secondary" href="/Menu">Hủy</a>
+            <button type="submit" class="btn btn-primary">✓ Thêm món</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Init image preview
+        previewImage('ImageUrl', 'img-preview');
+    </script>
+}

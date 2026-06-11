@@ -118,7 +118,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("DineFlowPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:7001")
+        policy.WithOrigins("http://localhost:5173", "http://localhost:7001", "http://localhost:5083")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
