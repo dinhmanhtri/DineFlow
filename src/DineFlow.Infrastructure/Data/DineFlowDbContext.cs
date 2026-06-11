@@ -70,25 +70,27 @@ public class DineFlowDbContext : DbContext
 
     private static void SeedData(ModelBuilder modelBuilder)
     {
+        var seedDateTime = new DateTime(2026, 6, 11, 0, 0, 0, DateTimeKind.Utc);
+
         // ===== Seed Categories =====
         var categories = new[]
         {
-            new Category { Id = new Guid("11111111-0000-0000-0000-000000000001"), Name = "Khai vị",    DisplayOrder = 1, IsActive = true, CreatedAt = DateTime.UtcNow },
-            new Category { Id = new Guid("11111111-0000-0000-0000-000000000002"), Name = "Món chính",  DisplayOrder = 2, IsActive = true, CreatedAt = DateTime.UtcNow },
-            new Category { Id = new Guid("11111111-0000-0000-0000-000000000003"), Name = "Tráng miệng",DisplayOrder = 3, IsActive = true, CreatedAt = DateTime.UtcNow },
-            new Category { Id = new Guid("11111111-0000-0000-0000-000000000004"), Name = "Đồ uống",   DisplayOrder = 4, IsActive = true, CreatedAt = DateTime.UtcNow },
+            new Category { Id = new Guid("11111111-0000-0000-0000-000000000001"), Name = "Khai vị",    DisplayOrder = 1, IsActive = true, CreatedAt = seedDateTime },
+            new Category { Id = new Guid("11111111-0000-0000-0000-000000000002"), Name = "Món chính",  DisplayOrder = 2, IsActive = true, CreatedAt = seedDateTime },
+            new Category { Id = new Guid("11111111-0000-0000-0000-000000000003"), Name = "Tráng miệng",DisplayOrder = 3, IsActive = true, CreatedAt = seedDateTime },
+            new Category { Id = new Guid("11111111-0000-0000-0000-000000000004"), Name = "Đồ uống",   DisplayOrder = 4, IsActive = true, CreatedAt = seedDateTime },
         };
         modelBuilder.Entity<Category>().HasData(categories);
 
         // ===== Seed Menu Items =====
         var menuItems = new[]
         {
-            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000001"), Name = "Gỏi cuốn tôm thịt", CategoryId = new Guid("11111111-0000-0000-0000-000000000001"), Price = 45000, IsAvailable = true, CreatedAt = DateTime.UtcNow },
-            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000002"), Name = "Bò lúc lắc",        CategoryId = new Guid("11111111-0000-0000-0000-000000000002"), Price = 185000, IsAvailable = true, CreatedAt = DateTime.UtcNow },
-            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000003"), Name = "Cơm tấm sườn bì",   CategoryId = new Guid("11111111-0000-0000-0000-000000000002"), Price = 65000, IsAvailable = true, CreatedAt = DateTime.UtcNow },
-            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000004"), Name = "Chè ba màu",         CategoryId = new Guid("11111111-0000-0000-0000-000000000003"), Price = 35000, IsAvailable = true, CreatedAt = DateTime.UtcNow },
-            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000005"), Name = "Nước ép cam",        CategoryId = new Guid("11111111-0000-0000-0000-000000000004"), Price = 30000, IsAvailable = true, CreatedAt = DateTime.UtcNow },
-            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000006"), Name = "Trà đá",             CategoryId = new Guid("11111111-0000-0000-0000-000000000004"), Price = 10000, IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000001"), Name = "Gỏi cuốn tôm thịt", CategoryId = new Guid("11111111-0000-0000-0000-000000000001"), Price = 45000, IsAvailable = true, CreatedAt = seedDateTime },
+            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000002"), Name = "Bò lúc lắc",        CategoryId = new Guid("11111111-0000-0000-0000-000000000002"), Price = 185000, IsAvailable = true, CreatedAt = seedDateTime },
+            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000003"), Name = "Cơm tấm sườn bì",   CategoryId = new Guid("11111111-0000-0000-0000-000000000002"), Price = 65000, IsAvailable = true, CreatedAt = seedDateTime },
+            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000004"), Name = "Chè ba màu",         CategoryId = new Guid("11111111-0000-0000-0000-000000000003"), Price = 35000, IsAvailable = true, CreatedAt = seedDateTime },
+            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000005"), Name = "Nước ép cam",        CategoryId = new Guid("11111111-0000-0000-0000-000000000004"), Price = 30000, IsAvailable = true, CreatedAt = seedDateTime },
+            new MenuItem { Id = new Guid("22222222-0000-0000-0000-000000000006"), Name = "Trà đá",             CategoryId = new Guid("11111111-0000-0000-0000-000000000004"), Price = 10000, IsAvailable = true, CreatedAt = seedDateTime },
         };
         modelBuilder.Entity<MenuItem>().HasData(menuItems);
 
@@ -100,21 +102,21 @@ public class DineFlowDbContext : DbContext
             FloorNumber = i <= 5 ? 1 : 2,
             Capacity    = i % 3 == 0 ? 6 : 4,
             Status      = TableStatus.Available,
-            CreatedAt   = DateTime.UtcNow
+            CreatedAt   = seedDateTime
         }).ToArray();
         modelBuilder.Entity<DiningTable>().HasData(tables);
 
         // ===== Seed Admin Staff =====
-        // BCrypt hash của "Admin@123"
+        // BCrypt hash của "Admin@123" - Dùng hash tĩnh để tránh warning PendingModelChangesWarning do dynamic values
         modelBuilder.Entity<Staff>().HasData(new Staff
         {
             Id           = new Guid("44444444-0000-0000-0000-000000000001"),
             FullName     = "System Admin",
             Email        = "admin@dineflow.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+            PasswordHash = "$2a$11$qRzN7p9G5R34K.QYvS.l4.Qh474X2tO751853n2y90E9/wD54992y",
             Role         = StaffRole.Admin,
             IsActive     = true,
-            CreatedAt    = DateTime.UtcNow
+            CreatedAt    = seedDateTime
         });
     }
 }

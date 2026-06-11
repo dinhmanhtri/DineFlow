@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DineFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(DineFlowDbContext))]
-    [Migration("20260611094242_InitialCreate")]
+    [Migration("20260611100030_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -58,7 +58,7 @@ namespace DineFlow.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(1595),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 1,
                             IsActive = true,
                             Name = "Khai vị"
@@ -66,7 +66,7 @@ namespace DineFlow.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(2944),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 2,
                             IsActive = true,
                             Name = "Món chính"
@@ -74,7 +74,7 @@ namespace DineFlow.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-0000-0000-0000-000000000003"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(2955),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 3,
                             IsActive = true,
                             Name = "Tráng miệng"
@@ -82,7 +82,7 @@ namespace DineFlow.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-0000-0000-0000-000000000004"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(2965),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             DisplayOrder = 4,
                             IsActive = true,
                             Name = "Đồ uống"
@@ -127,7 +127,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000001"),
                             Capacity = 4,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5321),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 1,
                             Status = "Available",
                             TableNumber = 1
@@ -136,7 +136,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000002"),
                             Capacity = 4,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5612),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 1,
                             Status = "Available",
                             TableNumber = 2
@@ -145,7 +145,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000003"),
                             Capacity = 6,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5626),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 1,
                             Status = "Available",
                             TableNumber = 3
@@ -154,7 +154,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000004"),
                             Capacity = 4,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5634),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 1,
                             Status = "Available",
                             TableNumber = 4
@@ -163,7 +163,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000005"),
                             Capacity = 4,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5665),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 1,
                             Status = "Available",
                             TableNumber = 5
@@ -172,7 +172,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000006"),
                             Capacity = 6,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5674),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 2,
                             Status = "Available",
                             TableNumber = 6
@@ -181,7 +181,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000007"),
                             Capacity = 4,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5757),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 2,
                             Status = "Available",
                             TableNumber = 7
@@ -190,7 +190,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000008"),
                             Capacity = 4,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5768),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 2,
                             Status = "Available",
                             TableNumber = 8
@@ -199,7 +199,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000009"),
                             Capacity = 6,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5776),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 2,
                             Status = "Available",
                             TableNumber = 9
@@ -208,7 +208,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000010"),
                             Capacity = 4,
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5786),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             FloorNumber = 2,
                             Status = "Available",
                             TableNumber = 10
@@ -308,7 +308,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("22222222-0000-0000-0000-000000000001"),
                             CategoryId = new Guid("11111111-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7057),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
                             Name = "Gỏi cuốn tôm thịt",
                             Price = 45000m
@@ -317,7 +317,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("22222222-0000-0000-0000-000000000002"),
                             CategoryId = new Guid("11111111-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7133),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
                             Name = "Bò lúc lắc",
                             Price = 185000m
@@ -326,7 +326,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("22222222-0000-0000-0000-000000000003"),
                             CategoryId = new Guid("11111111-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7509),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
                             Name = "Cơm tấm sườn bì",
                             Price = 65000m
@@ -335,7 +335,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("22222222-0000-0000-0000-000000000004"),
                             CategoryId = new Guid("11111111-0000-0000-0000-000000000003"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7549),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
                             Name = "Chè ba màu",
                             Price = 35000m
@@ -344,7 +344,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("22222222-0000-0000-0000-000000000005"),
                             CategoryId = new Guid("11111111-0000-0000-0000-000000000004"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7558),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
                             Name = "Nước ép cam",
                             Price = 30000m
@@ -353,7 +353,7 @@ namespace DineFlow.Infrastructure.Migrations
                         {
                             Id = new Guid("22222222-0000-0000-0000-000000000006"),
                             CategoryId = new Guid("11111111-0000-0000-0000-000000000004"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7567),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
                             Name = "Trà đá",
                             Price = 10000m
@@ -490,11 +490,11 @@ namespace DineFlow.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("44444444-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 6, 11, 9, 42, 39, 868, DateTimeKind.Utc).AddTicks(466),
+                            CreatedAt = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@dineflow.com",
                             FullName = "System Admin",
                             IsActive = true,
-                            PasswordHash = "$2a$11$71Yo3wE4ADe8AWZ6vREIXuWxBxLAMzVI57mR0RW.HdQcGoNcVhJ0S",
+                            PasswordHash = "$2a$11$qRzN7p9G5R34K.QYvS.l4.Qh474X2tO751853n2y90E9/wD54992y",
                             Role = "Admin"
                         });
                 });

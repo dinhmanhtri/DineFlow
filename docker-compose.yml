@@ -26,7 +26,7 @@ services:
       - sqlserver_data:/var/opt/mssql # Persist database files
     restart: unless-stopped
     healthcheck:
-      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Beevn@123" -Q "SELECT 1" -b
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Beevn@123" -Q "SELECT 1" -No -b
       interval: 10s
       timeout: 5s
       retries: 5

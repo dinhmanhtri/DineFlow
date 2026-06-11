@@ -188,10 +188,10 @@ namespace DineFlow.Infrastructure.Migrations
                 columns: new[] { "Id", "CreatedAt", "DisplayOrder", "IsActive", "Name", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-0000-0000-0000-000000000001"), new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(1595), 1, true, "Khai vị", null },
-                    { new Guid("11111111-0000-0000-0000-000000000002"), new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(2944), 2, true, "Món chính", null },
-                    { new Guid("11111111-0000-0000-0000-000000000003"), new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(2955), 3, true, "Tráng miệng", null },
-                    { new Guid("11111111-0000-0000-0000-000000000004"), new DateTime(2026, 6, 11, 9, 42, 39, 334, DateTimeKind.Utc).AddTicks(2965), 4, true, "Đồ uống", null }
+                    { new Guid("11111111-0000-0000-0000-000000000001"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 1, true, "Khai vị", null },
+                    { new Guid("11111111-0000-0000-0000-000000000002"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 2, true, "Món chính", null },
+                    { new Guid("11111111-0000-0000-0000-000000000003"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 3, true, "Tráng miệng", null },
+                    { new Guid("11111111-0000-0000-0000-000000000004"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 4, true, "Đồ uống", null }
                 });
 
             migrationBuilder.InsertData(
@@ -199,34 +199,34 @@ namespace DineFlow.Infrastructure.Migrations
                 columns: new[] { "Id", "Capacity", "CreatedAt", "FloorNumber", "Status", "TableNumber", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-0000-0000-0000-000000000001"), 4, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5321), 1, "Available", 1, null },
-                    { new Guid("33333333-0000-0000-0000-000000000002"), 4, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5612), 1, "Available", 2, null },
-                    { new Guid("33333333-0000-0000-0000-000000000003"), 6, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5626), 1, "Available", 3, null },
-                    { new Guid("33333333-0000-0000-0000-000000000004"), 4, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5634), 1, "Available", 4, null },
-                    { new Guid("33333333-0000-0000-0000-000000000005"), 4, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5665), 1, "Available", 5, null },
-                    { new Guid("33333333-0000-0000-0000-000000000006"), 6, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5674), 2, "Available", 6, null },
-                    { new Guid("33333333-0000-0000-0000-000000000007"), 4, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5757), 2, "Available", 7, null },
-                    { new Guid("33333333-0000-0000-0000-000000000008"), 4, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5768), 2, "Available", 8, null },
-                    { new Guid("33333333-0000-0000-0000-000000000009"), 6, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5776), 2, "Available", 9, null },
-                    { new Guid("33333333-0000-0000-0000-000000000010"), 4, new DateTime(2026, 6, 11, 9, 42, 39, 343, DateTimeKind.Utc).AddTicks(5786), 2, "Available", 10, null }
+                    { new Guid("33333333-0000-0000-0000-000000000001"), 4, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 1, "Available", 1, null },
+                    { new Guid("33333333-0000-0000-0000-000000000002"), 4, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 1, "Available", 2, null },
+                    { new Guid("33333333-0000-0000-0000-000000000003"), 6, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 1, "Available", 3, null },
+                    { new Guid("33333333-0000-0000-0000-000000000004"), 4, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 1, "Available", 4, null },
+                    { new Guid("33333333-0000-0000-0000-000000000005"), 4, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 1, "Available", 5, null },
+                    { new Guid("33333333-0000-0000-0000-000000000006"), 6, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 2, "Available", 6, null },
+                    { new Guid("33333333-0000-0000-0000-000000000007"), 4, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 2, "Available", 7, null },
+                    { new Guid("33333333-0000-0000-0000-000000000008"), 4, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 2, "Available", 8, null },
+                    { new Guid("33333333-0000-0000-0000-000000000009"), 6, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 2, "Available", 9, null },
+                    { new Guid("33333333-0000-0000-0000-000000000010"), 4, new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), 2, "Available", 10, null }
                 });
 
             migrationBuilder.InsertData(
                 table: "Staffs",
                 columns: new[] { "Id", "CreatedAt", "Email", "FullName", "IsActive", "PasswordHash", "PhoneNumber", "Role", "UpdatedAt" },
-                values: new object[] { new Guid("44444444-0000-0000-0000-000000000001"), new DateTime(2026, 6, 11, 9, 42, 39, 868, DateTimeKind.Utc).AddTicks(466), "admin@dineflow.com", "System Admin", true, "$2a$11$71Yo3wE4ADe8AWZ6vREIXuWxBxLAMzVI57mR0RW.HdQcGoNcVhJ0S", null, "Admin", null });
+                values: new object[] { new Guid("44444444-0000-0000-0000-000000000001"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), "admin@dineflow.com", "System Admin", true, "$2a$11$qRzN7p9G5R34K.QYvS.l4.Qh474X2tO751853n2y90E9/wD54992y", null, "Admin", null });
 
             migrationBuilder.InsertData(
                 table: "MenuItems",
                 columns: new[] { "Id", "CategoryId", "CreatedAt", "Description", "ImageUrl", "IsAvailable", "Name", "Price", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("22222222-0000-0000-0000-000000000001"), new Guid("11111111-0000-0000-0000-000000000001"), new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7057), null, null, true, "Gỏi cuốn tôm thịt", 45000m, null },
-                    { new Guid("22222222-0000-0000-0000-000000000002"), new Guid("11111111-0000-0000-0000-000000000002"), new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7133), null, null, true, "Bò lúc lắc", 185000m, null },
-                    { new Guid("22222222-0000-0000-0000-000000000003"), new Guid("11111111-0000-0000-0000-000000000002"), new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7509), null, null, true, "Cơm tấm sườn bì", 65000m, null },
-                    { new Guid("22222222-0000-0000-0000-000000000004"), new Guid("11111111-0000-0000-0000-000000000003"), new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7549), null, null, true, "Chè ba màu", 35000m, null },
-                    { new Guid("22222222-0000-0000-0000-000000000005"), new Guid("11111111-0000-0000-0000-000000000004"), new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7558), null, null, true, "Nước ép cam", 30000m, null },
-                    { new Guid("22222222-0000-0000-0000-000000000006"), new Guid("11111111-0000-0000-0000-000000000004"), new DateTime(2026, 6, 11, 9, 42, 39, 336, DateTimeKind.Utc).AddTicks(7567), null, null, true, "Trà đá", 10000m, null }
+                    { new Guid("22222222-0000-0000-0000-000000000001"), new Guid("11111111-0000-0000-0000-000000000001"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), null, null, true, "Gỏi cuốn tôm thịt", 45000m, null },
+                    { new Guid("22222222-0000-0000-0000-000000000002"), new Guid("11111111-0000-0000-0000-000000000002"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), null, null, true, "Bò lúc lắc", 185000m, null },
+                    { new Guid("22222222-0000-0000-0000-000000000003"), new Guid("11111111-0000-0000-0000-000000000002"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), null, null, true, "Cơm tấm sườn bì", 65000m, null },
+                    { new Guid("22222222-0000-0000-0000-000000000004"), new Guid("11111111-0000-0000-0000-000000000003"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), null, null, true, "Chè ba màu", 35000m, null },
+                    { new Guid("22222222-0000-0000-0000-000000000005"), new Guid("11111111-0000-0000-0000-000000000004"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), null, null, true, "Nước ép cam", 30000m, null },
+                    { new Guid("22222222-0000-0000-0000-000000000006"), new Guid("11111111-0000-0000-0000-000000000004"), new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Utc), null, null, true, "Trà đá", 10000m, null }
                 });
 
             migrationBuilder.CreateIndex(
