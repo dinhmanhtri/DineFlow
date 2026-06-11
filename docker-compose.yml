@@ -6,31 +6,35 @@
 # - networks: internal network cho containers giao tiếp với nhau
 #
 # Lệnh:
-#   docker compose up -d        → start tất cả services (detached/background)
-#   docker compose down         → stop và xóa containers
-#   docker compose logs -f api  → xem logs của service cụ thể
-#   docker compose ps           → xem trạng thái các services
+#   docker compose up --build -d  → build + start tất cả services (detached)
+#   docker compose down           → stop và xóa containers
+#   docker compose logs -f api    → xem logs của service cụ thể
+#   docker compose ps             → xem trạng thái các services
+#
+# Chỉ start infra (dev mode):
+#   docker compose up -d sqlserver redis
 
 services:
+
   # ===== SQL Server =====
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: dineflow-sqlserver
     environment:
-      SA_PASSWORD: "Beevn@123" # Phải match ConnectionString
+      SA_PASSWORD: "Beevn@123"      # Phải match ConnectionString
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Developer" # Free Developer edition
+      MSSQL_PID: "Developer"        # Free Developer edition
     ports:
-      - "1433:1433" # host:container
+      - "1433:1433"                 # host:container
     volumes:
-      - sqlserver_data:/var/opt/mssql # Persist database files
+      - sqlserver_data:/var/opt/mssql
     restart: unless-stopped
     healthcheck:
       test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Beevn@123" -Q "SELECT 1" -No -b
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s # Cho SQL Server khởi động
+      start_period: 30s
 
   # ===== Redis =====
   # [KIẾN THỨC] Redis Alpine: image nhỏ hơn (~30MB vs ~100MB), dùng cho production
@@ -40,7 +44,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data # Persist cache (optional)
+      - redis_data:/data            # Persist cache (optional)
     command: redis-server --save 60 1 --loglevel warning
     # --save 60 1: snapshot mỗi 60s nếu có ít nhất 1 thay đổi (RDB persistence)
     # --loglevel warning: giảm noise logs
@@ -51,6 +55,56 @@ services:
       timeout: 3s
       retries: 5
 
+  # ===== DineFlow API =====
+  # [KIẾN THỨC] depends_on + condition: service_healthy
+  # → Docker Compose đợi sqlserver và redis healthy trước khi start api
+  # → Tránh lỗi "cannot connect to DB" lúc app khởi động
+  api:
+    build:
+      context: .
+      dockerfile: API.Dockerfile
+    container_name: dineflow-api
+    ports:
+      - "5103:8080"                 # host:container
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # [KIẾN THỨC] Double underscore (__) = dấu : trong config hierarchy
+      # ConnectionStrings__SqlServer → ConnectionStrings:SqlServer trong appsettings
+      ConnectionStrings__SqlServer: "Server=sqlserver,1433;Database=DineFlowDb;User Id=sa;Password=Beevn@123;TrustServerCertificate=True"
+      ConnectionStrings__Redis: "redis:6379"
+      Jwt__SecretKey: "DineFlow-Super-Secret-Key-Change-In-Production-Min32Chars!!"
+      Jwt__Issuer: "DineFlow"
+      Jwt__Audience: "DineFlowClient"
+      Jwt__ExpiryHours: "8"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ===== DineFlow Web (MVC) =====
+  web:
+    build:
+      context: .
+      dockerfile: Web.Dockerfile
+    container_name: dineflow-web
+    ports:
+      - "5083:8080"                 # host:container → http://localhost:5083
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ApiBaseUrl: "http://api:8080" # Internal Docker network (service name = hostname)
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
   # ===== Redis Commander (Web UI cho Redis - Development only) =====
   redis-ui:
     image: rediscommander/redis-commander:latest
@@ -58,13 +112,13 @@ services:
     environment:
       REDIS_HOSTS: "local:redis:6379"
     ports:
-      - "8081:8081" # Truy cập: http://localhost:8081
+      - "8081:8081"                 # Truy cập: http://localhost:8081
     depends_on:
       redis:
         condition: service_healthy
     restart: unless-stopped
     profiles:
-      - tools # Chỉ start khi dùng: docker compose --profile tools up
+      - tools                       # Chỉ start khi dùng: docker compose --profile tools up
 
 # ===== Named Volumes =====
 # Được Docker quản lý → data persist ngay cả khi container bị xóa

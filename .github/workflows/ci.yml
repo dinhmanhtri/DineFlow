@@ -1,0 +1,158 @@
+# =========================================================
+# ci.yml — GitHub Actions CI Pipeline
+#
+# [KIẾN THỨC] GitHub Actions:
+# - workflow: 1 file YAML = 1 pipeline
+# - trigger (on): khi nào pipeline chạy
+# - job: nhóm các steps chạy trên 1 runner
+# - step: 1 action hoặc shell command
+# - runner: máy ảo GitHub cấp miễn phí (ubuntu-latest)
+#
+# Pipeline này:
+# 1. build-and-test: restore → build → test (mọi push/PR)
+# 2. docker (chỉ push main): build image → push lên ghcr.io
+# =========================================================
+
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# [KIẾN THỨC] GITHUB_TOKEN: token tự động được GitHub cấp cho mỗi workflow run
+# → Dùng để push Docker image lên ghcr.io (không cần tạo secret thủ công)
+permissions:
+  contents: read
+  packages: write   # Cần để push lên ghcr.io
+
+env:
+  # Image names trên ghcr.io
+  # [KIẾN THỨC] ghcr.io/<owner>/<image>:tag
+  # github.repository = "dinhmanhtri/DineFlow" (tự động)
+  REGISTRY: ghcr.io
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/dineflow-api
+  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/dineflow-web
+
+jobs:
+  # ===== Job 1: Build & Test =====
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # [KIẾN THỨC] actions/checkout: clone repo vào runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # [KIẾN THỨC] actions/setup-dotnet: cài .NET SDK theo version chỉ định
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # Cache NuGet packages để build lần sau nhanh hơn
+      # [KIẾN THỨC] Cache key dùng hash của tất cả .csproj → invalidate khi packages thay đổi
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      # [KIẾN THỨC] --no-build: test đã được build ở step trên, không cần build lại
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
+
+  # ===== Job 2: Docker Build & Push =====
+  # [KIẾN THỨC] needs: job này chỉ chạy SAU KHI build-and-test thành công
+  # if: chỉ chạy khi push vào main (không chạy khi PR)
+  docker:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # [KIẾN THỨC] docker/setup-buildx-action: kích hoạt BuildKit
+      # BuildKit: Docker builder mới hơn, hỗ trợ cache, multi-platform
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login vào ghcr.io bằng GITHUB_TOKEN (không cần secret thêm)
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # [KIẾN THỨC] docker/metadata-action: tự động tạo tags và labels chuẩn OCI
+      # Tags được tạo:
+      #   ghcr.io/dinhmanhtri/dineflow-api:latest
+      #   ghcr.io/dinhmanhtri/dineflow-api:main
+      #   ghcr.io/dinhmanhtri/dineflow-api:sha-<7ký tự>
+      - name: Extract metadata for API image
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.API_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Extract metadata for Web image
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.WEB_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      # Build và push API image
+      # [KIẾN THỨC] cache-from/to: reuse build cache giữa các CI runs → build nhanh hơn
+      - name: Build and push API Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: API.Dockerfile
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Web Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Web.Dockerfile
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Summary: in ra link image sau khi push thành công
+      - name: Print image URLs
+        run: |
+          echo "✅ API image: ${{ env.API_IMAGE }}:latest"
+          echo "✅ Web image: ${{ env.WEB_IMAGE }}:latest"
+          echo ""
+          echo "Pull images:"
+          echo "  docker pull ${{ env.API_IMAGE }}:latest"
+          echo "  docker pull ${{ env.WEB_IMAGE }}:latest"
