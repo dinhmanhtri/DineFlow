@@ -1,0 +1,172 @@
+@model DineFlow.Web.Models.TableIndexViewModel
+@{
+    ViewData["Title"]    = "Bàn ăn";
+    ViewData["Subtitle"] = "Sơ đồ bàn theo tầng — cập nhật trạng thái realtime";
+}
+
+<!-- KPI Row -->
+<div class="kpi-row" style="margin-bottom:24px;">
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8);">🪑</div>
+        <div class="kpi-body">
+            <div class="kpi-value">@Model.TotalTables</div>
+            <div class="kpi-label">Tổng số bàn</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#10b981,#34d399);">✅</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#10b981;">@Model.AvailableTables</div>
+            <div class="kpi-label">Bàn trống</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">🔴</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#f59e0b;">@Model.OccupiedTables</div>
+            <div class="kpi-label">Đang có khách</div>
+        </div>
+    </div>
+</div>
+
+<!-- Toolbar -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <!-- Floor Filter -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="/Tables" class="btn @(Model.FilterFloor == null ? "btn-primary" : "btn-secondary")">
+            Tất cả tầng
+        </a>
+        @foreach (var f in Model.Floors)
+        {
+            <a href="/Tables?floor=@f" class="btn @(Model.FilterFloor == f ? "btn-primary" : "btn-secondary")">
+                Tầng @f
+            </a>
+        }
+    </div>
+    <a href="/Tables/Create" class="btn btn-primary" id="btn-add-table">
+        <span>➕</span> Thêm bàn mới
+    </a>
+</div>
+
+@if (!Model.Tables.Any())
+{
+    <div class="empty-state">
+        <div style="font-size:64px;margin-bottom:16px;">🪑</div>
+        <h3 style="margin:0 0 8px;">Chưa có bàn nào</h3>
+        <p style="color:var(--text-muted);margin-bottom:24px;">Hãy thêm bàn đầu tiên cho nhà hàng.</p>
+        <a href="/Tables/Create" class="btn btn-primary">Thêm bàn ngay</a>
+    </div>
+}
+else
+{
+    @foreach (var floor in Model.Tables.Select(t => t.FloorNumber).Distinct().OrderBy(f => f))
+    {
+        var floorTables = Model.Tables.Where(t => t.FloorNumber == floor).OrderBy(t => t.TableNumber);
+        <div style="margin-bottom:32px;">
+            <h3 style="font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;
+                       letter-spacing:1px;margin-bottom:16px;">🏢 Tầng @floor</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;">
+                @foreach (var table in floorTables)
+                {
+                    var (statusColor, statusBg, statusDot) = table.Status switch
+                    {
+                        0 => ("var(--success)", "rgba(16,185,129,0.1)", "🟢"),   // Available
+                        1 => ("var(--warning)", "rgba(245,158,11,0.1)", "🔴"),   // Occupied
+                        2 => ("#818cf8",         "rgba(99,102,241,0.1)",  "🔵"),  // Reserved
+                        3 => ("var(--text-muted)","rgba(100,116,139,0.1)","⚪"), // Cleaning
+                        _ => ("var(--text-muted)","transparent", "⚫")
+                    };
+                    <div class="table-card" style="background:var(--bg-secondary);border-radius:16px;
+                                padding:20px;border:1px solid var(--border);position:relative;
+                                transition:transform .2s,box-shadow .2s;cursor:default;"
+                         onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.3)'"
+                         onmouseleave="this.style.transform='';this.style.boxShadow=''">
+                        <!-- Table number -->
+                        <div style="font-size:28px;font-weight:800;color:var(--text-primary);margin-bottom:4px;">
+                            Bàn @table.TableNumber
+                        </div>
+                        <!-- Status -->
+                        <div style="font-size:12px;font-weight:600;color:@statusColor;
+                                   background:@statusBg;border-radius:20px;padding:3px 10px;
+                                   display:inline-block;margin-bottom:10px;">
+                            @statusDot @table.StatusDisplay
+                        </div>
+                        <!-- Info -->
+                        <div style="font-size:12px;color:var(--text-muted);">
+                            👥 @table.Capacity người
+                        </div>
+
+                        <!-- Actions -->
+                        <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;">
+                            @if (table.Status == 0) // Available → set Occupied
+                            {
+                                <form asp-action="UpdateStatus" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id"     value="@table.Id" />
+                                    <input type="hidden" name="status" value="1" />
+                                    <button type="submit" class="btn btn-sm"
+                                            style="width:100%;background:rgba(245,158,11,.15);
+                                                   color:#f59e0b;border:1px solid rgba(245,158,11,.3);">
+                                        📌 Đánh dấu có khách
+                                    </button>
+                                </form>
+                            }
+                            @if (table.Status == 1) // Occupied → set Cleaning
+                            {
+                                <form asp-action="UpdateStatus" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id"     value="@table.Id" />
+                                    <input type="hidden" name="status" value="3" />
+                                    <button type="submit" class="btn btn-sm"
+                                            style="width:100%;background:rgba(100,116,139,.15);
+                                                   color:var(--text-muted);border:1px solid var(--border);">
+                                        🧹 Đang dọn dẹp
+                                    </button>
+                                </form>
+                            }
+                            @if (table.Status == 3) // Cleaning → Available
+                            {
+                                <form asp-action="UpdateStatus" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id"     value="@table.Id" />
+                                    <input type="hidden" name="status" value="0" />
+                                    <button type="submit" class="btn btn-sm"
+                                            style="width:100%;background:rgba(16,185,129,.15);
+                                                   color:#10b981;border:1px solid rgba(16,185,129,.3);">
+                                        ✅ Sẵn sàng
+                                    </button>
+                                </form>
+                            }
+                            <!-- Delete button -->
+                            @if (table.Status == 0)
+                            {
+                                <button class="btn btn-sm btn-danger"
+                                        style="width:100%;"
+                                        onclick="confirmDelete('@table.Id', 'Bàn @table.TableNumber')">
+                                    🗑️ Xóa
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+
+<!-- Hidden delete form -->
+<form id="delete-form" asp-action="Delete" method="post" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="delete-id" name="id" />
+</form>
+
+@section Scripts {
+<script>
+function confirmDelete(id, name) {
+    document.getElementById('delete-id').value = id;
+    document.getElementById('delete-item-name').textContent = name;
+    document.getElementById('delete-modal').classList.add('active');
+    window._deleteFormId = 'delete-form';
+}
+</script>
+}

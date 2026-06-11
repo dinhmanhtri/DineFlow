@@ -1,0 +1,131 @@
+@model DineFlow.Web.Models.OrderIndexViewModel
+@{
+    ViewData["Title"]    = "Đơn hàng";
+    ViewData["Subtitle"] = "Quản lý tất cả đơn hàng trong ngày";
+}
+
+<!-- KPI -->
+<div class="kpi-row" style="margin-bottom:24px;">
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8);">📋</div>
+        <div class="kpi-body">
+            <div class="kpi-value">@Model.TotalOrders</div>
+            <div class="kpi-label">Tổng đơn</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">⏳</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#f59e0b;">@Model.PendingCount</div>
+            <div class="kpi-label">Chờ xử lý</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);">👨‍🍳</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#3b82f6;">@Model.PreparingCount</div>
+            <div class="kpi-label">Đang làm</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#10b981,#34d399);">✅</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#10b981;">@Model.ServedCount</div>
+            <div class="kpi-label">Đã phục vụ</div>
+        </div>
+    </div>
+</div>
+
+<!-- Toolbar -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="/Orders" class="btn @(Model.StatusFilter == null ? "btn-primary" : "btn-secondary")">Tất cả</a>
+        <a href="/Orders?status=0" class="btn @(Model.StatusFilter == 0 ? "btn-primary" : "btn-secondary")" style="color:#f59e0b;">⏳ Chờ xử lý</a>
+        <a href="/Orders?status=1" class="btn @(Model.StatusFilter == 1 ? "btn-primary" : "btn-secondary")" style="color:#3b82f6;">👨‍🍳 Đang làm</a>
+        <a href="/Orders?status=2" class="btn @(Model.StatusFilter == 2 ? "btn-primary" : "btn-secondary")" style="color:#10b981;">✅ Đã phục vụ</a>
+    </div>
+    <a href="/Orders/Create" class="btn btn-primary" id="btn-new-order">
+        ➕ Tạo đơn mới
+    </a>
+</div>
+
+@if (!Model.Orders.Any())
+{
+    <div class="empty-state">
+        <div style="font-size:64px;margin-bottom:16px;">📋</div>
+        <h3 style="margin:0 0 8px;">Không có đơn hàng nào</h3>
+        <p style="color:var(--text-muted);margin-bottom:24px;">Tạo đơn hàng đầu tiên ngay bây giờ.</p>
+        <a href="/Orders/Create" class="btn btn-primary">Tạo đơn hàng</a>
+    </div>
+}
+else
+{
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Bàn</th>
+                    <th>Nhân viên</th>
+                    <th>Số món</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thời gian</th>
+                    <th style="text-align:right;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Orders.OrderByDescending(o => o.CreatedAt))
+                {
+                    var (badgeColor, badgeBg) = order.Status switch
+                    {
+                        0 => ("#f59e0b", "rgba(245,158,11,0.15)"),   // Pending
+                        1 => ("#3b82f6", "rgba(59,130,246,0.15)"),    // Preparing
+                        2 => ("#10b981", "rgba(16,185,129,0.15)"),    // Served
+                        3 => ("#6366f1", "rgba(99,102,241,0.15)"),    // Paid
+                        4 => ("#ef4444", "rgba(239,68,68,0.15)"),     // Cancelled
+                        _ => ("var(--text-muted)", "transparent")
+                    };
+                    <tr>
+                        <td><strong>Bàn @order.TableNumber</strong></td>
+                        <td style="color:var(--text-muted);">@order.StaffName</td>
+                        <td>@order.ItemCount món</td>
+                        <td><strong>@order.TotalAmount.ToString("N0") ₫</strong></td>
+                        <td>
+                            <span style="font-size:12px;font-weight:600;color:@badgeColor;
+                                        background:@badgeBg;border-radius:20px;padding:3px 10px;">
+                                @order.StatusDisplay
+                            </span>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:13px;">
+                            @order.CreatedAt.ToString("HH:mm dd/MM")
+                        </td>
+                        <td style="text-align:right;">
+                            <a href="/Orders/Detail/@order.Id" class="btn btn-sm btn-secondary"
+                               id="btn-detail-@order.Id">👁️ Chi tiết</a>
+                            @if (order.Status == 0 || order.Status == 1)
+                            {
+                                <form asp-action="Cancel" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@order.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Hủy đơn hàng Bàn @order.TableNumber?')"
+                                            id="btn-cancel-@order.Id">
+                                        ✕ Hủy
+                                    </button>
+                                </form>
+                            }
+                            @if (order.Status == 2)
+                            {
+                                <a href="/Invoices/Create/@order.Id" class="btn btn-sm"
+                                   style="background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);"
+                                   id="btn-pay-@order.Id">
+                                    💳 Thanh toán
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

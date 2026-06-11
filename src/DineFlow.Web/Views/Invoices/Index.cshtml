@@ -1,0 +1,88 @@
+@model DineFlow.Web.Models.InvoiceIndexViewModel
+@{
+    ViewData["Title"]    = "Hóa đơn";
+    ViewData["Subtitle"] = $"Hóa đơn ngày {Model.Date:dd/MM/yyyy}";
+}
+
+<!-- KPI -->
+<div class="kpi-row" style="margin-bottom:24px;">
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#10b981,#34d399);">💰</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#10b981;">@Model.TodayRevenue.ToString("N0") ₫</div>
+            <div class="kpi-label">Doanh thu hôm nay</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8);">🧾</div>
+        <div class="kpi-body">
+            <div class="kpi-value">@Model.TodayCount</div>
+            <div class="kpi-label">Số hóa đơn</div>
+        </div>
+    </div>
+    @if (Model.TodayCount > 0)
+    {
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">📊</div>
+            <div class="kpi-body">
+                <div class="kpi-value">@((Model.TodayRevenue / Model.TodayCount).ToString("N0")) ₫</div>
+                <div class="kpi-label">Trung bình / đơn</div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Invoices.Any())
+{
+    <div class="empty-state">
+        <div style="font-size:64px;margin-bottom:16px;">🧾</div>
+        <h3 style="margin:0 0 8px;">Chưa có hóa đơn hôm nay</h3>
+        <p style="color:var(--text-muted);">Hóa đơn sẽ xuất hiện khi đơn hàng được thanh toán.</p>
+    </div>
+}
+else
+{
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Bàn</th>
+                    <th>Tạm tính</th>
+                    <th>Giảm giá</th>
+                    <th>Thuế (8%)</th>
+                    <th>Tổng thanh toán</th>
+                    <th>Thanh toán</th>
+                    <th>Thu ngân</th>
+                    <th>Thời gian</th>
+                    <th style="text-align:right;">Chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var inv in Model.Invoices.OrderByDescending(i => i.PaidAt))
+                {
+                    var payLabel = inv.PaymentMethod switch
+                    {
+                        0 => "💵 Tiền mặt",
+                        1 => "🏦 Chuyển khoản",
+                        2 => "💳 Thẻ",
+                        _ => inv.PaymentMethodDisplay
+                    };
+                    <tr>
+                        <td><strong>Bàn @inv.TableNumber</strong></td>
+                        <td>@inv.SubTotal.ToString("N0") ₫</td>
+                        <td style="color:#ef4444;">-@inv.DiscountAmount.ToString("N0") ₫</td>
+                        <td style="color:var(--text-muted);">@inv.TaxAmount.ToString("N0") ₫</td>
+                        <td><strong style="color:#10b981;">@inv.Total.ToString("N0") ₫</strong></td>
+                        <td>@payLabel</td>
+                        <td style="color:var(--text-muted);">@inv.CashierName</td>
+                        <td style="color:var(--text-muted);font-size:13px;">@inv.PaidAt.ToString("HH:mm")</td>
+                        <td style="text-align:right;">
+                            <a href="/Invoices/Detail/@inv.OrderId" class="btn btn-sm btn-secondary"
+                               id="btn-inv-detail-@inv.Id">🧾 Xem</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

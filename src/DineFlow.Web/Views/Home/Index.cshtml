@@ -1,42 +1,118 @@
-@model DineFlow.Web.Models.DashboardViewModel
+@model DineFlow.Web.Models.DashboardSummaryViewModel
 @{
     ViewData["Title"]    = "Dashboard";
-    ViewData["Subtitle"] = "Tổng quan hệ thống";
+    ViewData["Subtitle"] = $"Tổng quan hôm nay — {DateTime.Now:dd/MM/yyyy}";
+    var growth = Model.RevenueGrowth;
+    var growthColor = growth >= 0 ? "#10b981" : "#ef4444";
+    var growthIcon  = growth >= 0 ? "📈" : "📉";
 }
 
 <!-- KPI Cards -->
-<div class="kpi-grid">
-
+<div class="kpi-row" style="margin-bottom:24px;">
     <div class="kpi-card">
-        <div class="kpi-icon amber">🍜</div>
-        <div>
-            <div class="kpi-value">@Model.TotalMenuItems</div>
-            <div class="kpi-label">Tổng món ăn</div>
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#10b981,#34d399);">💰</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#10b981;">@Model.TodayRevenue.ToString("N0") ₫</div>
+            <div class="kpi-label">
+                Doanh thu hôm nay
+                <span style="color:@growthColor;font-weight:600;margin-left:6px;font-size:11px;">
+                    @growthIcon @(growth >= 0 ? "+" : "")@growth.ToString("F1")% so với hôm qua
+                </span>
+            </div>
         </div>
     </div>
-
     <div class="kpi-card">
-        <div class="kpi-icon green">✅</div>
-        <div>
-            <div class="kpi-value">@Model.AvailableItems</div>
-            <div class="kpi-label">Đang bán</div>
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8);">📋</div>
+        <div class="kpi-body">
+            <div class="kpi-value">@Model.TodayOrders</div>
+            <div class="kpi-label">Đơn hàng hôm nay</div>
         </div>
     </div>
-
     <div class="kpi-card">
-        <div class="kpi-icon red">🚫</div>
-        <div>
-            <div class="kpi-value">@Model.UnavailableItems</div>
-            <div class="kpi-label">Tạm ngừng</div>
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">🔴</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#f59e0b;">@Model.ActiveTables</div>
+            <div class="kpi-label">Bàn đang có khách</div>
         </div>
     </div>
-
     <div class="kpi-card">
-        <div class="kpi-icon blue">📋</div>
-        <div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-label">Đơn hôm nay</div>
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);">🟢</div>
+        <div class="kpi-body">
+            <div class="kpi-value" style="color:#3b82f6;">@Model.AvailableTables</div>
+            <div class="kpi-label">Bàn trống</div>
         </div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+
+    <!-- Top Items -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">🏆 Món bán chạy hôm nay</div>
+                <div class="card-subtitle">Top 5 theo doanh thu</div>
+            </div>
+        </div>
+        @if (!Model.TopItems.Any())
+        {
+            <p style="color:var(--text-muted);text-align:center;padding:20px 0;">Chưa có dữ liệu</p>
+        }
+        else
+        {
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                @foreach (var (item, idx) in Model.TopItems.Take(5).Select((x, i) => (x, i)))
+                {
+                    var medals = new[] { "🥇", "🥈", "🥉", "4️⃣", "5️⃣" };
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px;
+                               background:var(--bg-primary);border-radius:10px;">
+                        <span style="font-size:18px;">@medals[idx]</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                @item.Name
+                            </div>
+                            <div style="font-size:12px;color:var(--text-muted);">@item.TotalQuantity suất</div>
+                        </div>
+                        <div style="font-weight:700;color:var(--accent);white-space:nowrap;">
+                            @item.TotalRevenue.ToString("N0") ₫
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Hourly Revenue Chart (simple bar) -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">📊 Doanh thu theo giờ</div>
+                <div class="card-subtitle">Biểu đồ hôm nay</div>
+            </div>
+        </div>
+        @if (!Model.HourlyRevenue.Any(h => h.Amount > 0))
+        {
+            <p style="color:var(--text-muted);text-align:center;padding:20px 0;">Chưa có dữ liệu</p>
+        }
+        else
+        {
+            var maxAmount = Model.HourlyRevenue.Max(h => h.Amount);
+            var activeHours = Model.HourlyRevenue.Where(h => h.Amount > 0).ToList();
+            <div style="display:flex;align-items:flex-end;gap:4px;height:120px;padding:0 4px;">
+                @foreach (var h in Enumerable.Range(6, 18).Select(i => Model.HourlyRevenue.FirstOrDefault(x => x.Hour == i) ?? new(i, 0)))
+                {
+                    var pct  = maxAmount > 0 ? (double)h.Amount / (double)maxAmount * 100 : 0;
+                    var isNow = h.Hour == DateTime.Now.Hour;
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;"
+                         title="@h.Hour:00 — @h.Amount.ToString("N0") ₫">
+                        <div style="width:100%;background:@(isNow ? "var(--accent)" : "rgba(99,102,241,.4)");
+                                   height:@(Math.Max(pct, h.Amount > 0 ? 4 : 0))%;border-radius:4px 4px 0 0;
+                                   transition:height .3s;min-height:@(h.Amount > 0 ? "4px" : "0");"></div>
+                        <div style="font-size:9px;color:var(--text-muted);">@h.Hour</div>
+                    </div>
+                }
+            </div>
+        }
     </div>
 
 </div>
@@ -45,51 +121,36 @@
 <div class="card">
     <div class="card-header">
         <div>
-            <div class="card-title">Truy cập nhanh</div>
+            <div class="card-title">⚡ Truy cập nhanh</div>
             <div class="card-subtitle">Các chức năng thường dùng</div>
         </div>
     </div>
-
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
-
-        <a href="/Menu" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);transition:all var(--transition);color:var(--text-secondary);"
-           onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
-            <span style="font-size:24px;">🍜</span>
-            <div>
-                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Quản lý thực đơn</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Thêm, sửa, xóa món</div>
-            </div>
-        </a>
-
-        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);opacity:0.5;cursor:not-allowed;">
-            <span style="font-size:24px;">🪑</span>
-            <div>
-                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Quản lý bàn</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sắp có — Phase 7</div>
-            </div>
-        </div>
-
-        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);opacity:0.5;cursor:not-allowed;">
-            <span style="font-size:24px;">📋</span>
-            <div>
-                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Đơn hàng</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sắp có — Phase 7</div>
-            </div>
-        </div>
-
-        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--border);opacity:0.5;cursor:not-allowed;">
-            <span style="font-size:24px;">🧾</span>
-            <div>
-                <div style="font-weight:600;color:var(--text-primary);font-size:13px;">Hóa đơn</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sắp có — Phase 7</div>
-            </div>
-        </div>
-
+        @foreach (var (href, icon, title, sub) in new[]
+        {
+            ("/Menu",     "🍜", "Quản lý thực đơn",  "Thêm, sửa, xóa món"),
+            ("/Tables",   "🪑", "Quản lý bàn",        "Sơ đồ bàn theo tầng"),
+            ("/Orders",   "📋", "Đơn hàng",           "Tạo và xử lý đơn"),
+            ("/Invoices", "🧾", "Hóa đơn",            "Thanh toán hôm nay"),
+            ("/Staff",    "👥", "Nhân viên",           "Danh sách nhân sự"),
+        })
+        {
+            <a href="@href" style="display:flex;align-items:center;gap:12px;padding:16px;
+                                   background:var(--bg-hover);border-radius:var(--radius-md);
+                                   border:1px solid var(--border);transition:all var(--transition);
+                                   color:var(--text-secondary);text-decoration:none;"
+               onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+               onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
+                <span style="font-size:24px;">@icon</span>
+                <div>
+                    <div style="font-weight:600;color:var(--text-primary);font-size:13px;">@title</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">@sub</div>
+                </div>
+            </a>
+        }
     </div>
 </div>
 
-<!-- Toast from TempData -->
 @if (TempData["Success"] is string successMsg)
 {
     <script>document.addEventListener('DOMContentLoaded', () => showToast('@Html.Raw(successMsg)', 'success'));</script>

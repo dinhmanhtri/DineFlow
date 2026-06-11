@@ -1,0 +1,61 @@
+@model DineFlow.Web.Models.TableFormViewModel
+@{
+    ViewData["Title"]    = "Thêm bàn mới";
+    ViewData["Subtitle"] = "Khai báo thông tin bàn ăn mới";
+}
+
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <div class="form-icon">🪑</div>
+            <h2 class="form-title">Thêm bàn mới</h2>
+            <p class="form-subtitle">Điền thông tin bàn ăn cần thêm vào hệ thống</p>
+        </div>
+
+        <form asp-action="Create" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:none;"></div>
+
+            <div class="form-group">
+                <label asp-for="TableNumber" class="form-label"></label>
+                <input asp-for="TableNumber" class="form-control" type="number" min="1" max="999"
+                       placeholder="Ví dụ: 1, 2, 10..." />
+                <span asp-validation-for="TableNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="form-group">
+                    <label asp-for="FloorNumber" class="form-label"></label>
+                    <select asp-for="FloorNumber" class="form-control">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <option value="@i">Tầng @i</option>
+                        }
+                    </select>
+                    <span asp-validation-for="FloorNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Capacity" class="form-label"></label>
+                    <select asp-for="Capacity" class="form-control">
+                        @foreach (var cap in new[] { 2, 4, 6, 8, 10, 12, 16, 20 })
+                        {
+                            <option value="@cap">@cap người</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Capacity" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="/Tables" class="btn btn-secondary">← Quay lại</a>
+                <button type="submit" class="btn btn-primary" id="btn-submit">
+                    ➕ Thêm bàn
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

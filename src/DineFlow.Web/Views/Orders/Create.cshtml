@@ -1,0 +1,83 @@
+@model DineFlow.Web.Models.CreateOrderViewModel
+@{
+    ViewData["Title"]    = "Tạo đơn hàng mới";
+    ViewData["Subtitle"] = "Chọn bàn và tạo đơn hàng";
+}
+
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <div class="form-icon">📋</div>
+            <h2 class="form-title">Tạo đơn hàng mới</h2>
+            <p class="form-subtitle">Chọn bàn ăn cần tạo đơn (chỉ hiển thị bàn trống)</p>
+        </div>
+
+        @if (!Model.AvailableTables.Any())
+        {
+            <div style="text-align:center;padding:24px;">
+                <div style="font-size:48px;margin-bottom:12px;">🪑</div>
+                <p style="color:var(--text-muted);">Hiện tại không có bàn trống. Vui lòng chờ khách thanh toán.</p>
+                <a href="/Tables" class="btn btn-secondary">Xem sơ đồ bàn</a>
+            </div>
+        }
+        else
+        {
+            <form asp-action="Create" method="post" novalidate>
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:none;"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Chọn bàn (đang trống)</label>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">
+                        @foreach (var table in Model.AvailableTables.OrderBy(t => t.FloorNumber).ThenBy(t => t.TableNumber))
+                        {
+                            <label style="cursor:pointer;">
+                                <input type="radio" name="TableId" value="@table.Id"
+                                       style="display:none;" class="table-radio"
+                                       onclick="selectTable(this)" required />
+                                <div class="table-choice" id="tc-@table.Id"
+                                     style="border:2px solid var(--border);border-radius:12px;
+                                            padding:14px;text-align:center;transition:all .2s;
+                                            background:var(--bg-primary);">
+                                    <div style="font-size:20px;font-weight:800;">@table.TableNumber</div>
+                                    <div style="font-size:11px;color:var(--text-muted);">Tầng @table.FloorNumber</div>
+                                    <div style="font-size:11px;color:var(--text-muted);">@table.Capacity người</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                    <span asp-validation-for="TableId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Note" class="form-label">Ghi chú (tùy chọn)</label>
+                    <input asp-for="Note" class="form-control" placeholder="Ghi chú cho đơn hàng..." />
+                </div>
+
+                <div class="form-actions">
+                    <a href="/Orders" class="btn btn-secondary">← Quay lại</a>
+                    <button type="submit" class="btn btn-primary" id="btn-create-order">
+                        📋 Tạo đơn hàng
+                    </button>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function selectTable(radio) {
+    document.querySelectorAll('.table-choice').forEach(el => {
+        el.style.borderColor = 'var(--border)';
+        el.style.background  = 'var(--bg-primary)';
+    });
+    const chosen = document.getElementById('tc-' + radio.value);
+    if (chosen) {
+        chosen.style.borderColor = 'var(--accent)';
+        chosen.style.background  = 'rgba(99,102,241,0.12)';
+    }
+}
+</script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

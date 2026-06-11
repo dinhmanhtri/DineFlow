@@ -1,0 +1,113 @@
+@model DineFlow.Web.Models.CreateInvoiceViewModel
+@{
+    ViewData["Title"]    = "Thanh toán";
+    ViewData["Subtitle"] = $"Tạo hóa đơn — Bàn {Model.TableNumber}";
+}
+
+<div class="form-container">
+    <div class="form-card" style="max-width:520px;">
+        <div class="form-header">
+            <div class="form-icon">💳</div>
+            <h2 class="form-title">Thanh toán</h2>
+            <p class="form-subtitle">Bàn @Model.TableNumber — Tổng đơn: @Model.SubTotal.ToString("N0") ₫</p>
+        </div>
+
+        <form asp-action="Create" method="post" novalidate id="invoice-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="OrderId" />
+            <input type="hidden" asp-for="TableNumber" />
+            <input type="hidden" asp-for="SubTotal" />
+            <input type="hidden" asp-for="TaxAmount" />
+
+            <!-- Bill Summary -->
+            <div style="background:var(--bg-primary);border-radius:12px;padding:20px;margin-bottom:20px;">
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Tạm tính:</span>
+                        <span>@Model.SubTotal.ToString("N0") ₫</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Thuế (8%):</span>
+                        <span>@Model.TaxAmount.ToString("N0") ₫</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;" id="discount-row">
+                        <span style="color:#ef4444;">Giảm giá:</span>
+                        <span id="discount-display" style="color:#ef4444;">-0 ₫</span>
+                    </div>
+                    <div style="border-top:1px solid var(--border);padding-top:10px;
+                                display:flex;justify-content:space-between;font-size:20px;font-weight:800;">
+                        <span>Tổng thanh toán:</span>
+                        <span id="total-display" style="color:#10b981;">
+                            @(Model.SubTotal + Model.TaxAmount).ToString("N0") ₫
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discount -->
+            <div class="form-group">
+                <label asp-for="DiscountAmount" class="form-label"></label>
+                <input asp-for="DiscountAmount" class="form-control" type="number" min="0"
+                       placeholder="0" id="discount-input" oninput="updateTotal()" />
+                <span asp-validation-for="DiscountAmount" class="text-danger"></span>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="form-group">
+                <label class="form-label">Phương thức thanh toán</label>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+                    @foreach (var (val, label, icon) in new[] { (0,"Tiền mặt","💵"), (1,"Chuyển khoản","🏦"), (2,"Thẻ","💳") })
+                    {
+                        <label style="cursor:pointer;">
+                            <input type="radio" name="PaymentMethod" value="@val"
+                                   @(val == 0 ? "checked" : "")
+                                   style="display:none;" class="pay-radio"
+                                   onchange="selectPayment(this)" />
+                            <div class="pay-choice" id="pay-@val"
+                                 style="border:2px solid @(val == 0 ? "var(--accent)" : "var(--border)");
+                                        background:@(val == 0 ? "rgba(99,102,241,.12)" : "var(--bg-primary)");
+                                        border-radius:12px;padding:14px;text-align:center;transition:all .2s;">
+                                <div style="font-size:24px;">@icon</div>
+                                <div style="font-size:12px;font-weight:600;margin-top:4px;">@label</div>
+                            </div>
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="javascript:history.back()" class="btn btn-secondary">← Quay lại</a>
+                <button type="submit" class="btn btn-primary" id="btn-pay-confirm">
+                    ✅ Xác nhận thanh toán
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const subTotal  = @Model.SubTotal;
+const taxAmount = @Model.TaxAmount;
+
+function updateTotal() {
+    const discount = parseFloat(document.getElementById('discount-input').value) || 0;
+    const total    = Math.max(0, subTotal + taxAmount - discount);
+    document.getElementById('discount-display').textContent = '-' + discount.toLocaleString('vi') + ' ₫';
+    document.getElementById('total-display').textContent    = total.toLocaleString('vi') + ' ₫';
+}
+
+function selectPayment(radio) {
+    document.querySelectorAll('.pay-choice').forEach(el => {
+        el.style.borderColor = 'var(--border)';
+        el.style.background  = 'var(--bg-primary)';
+    });
+    const chosen = document.getElementById('pay-' + radio.value);
+    if (chosen) {
+        chosen.style.borderColor = 'var(--accent)';
+        chosen.style.background  = 'rgba(99,102,241,0.12)';
+    }
+}
+</script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

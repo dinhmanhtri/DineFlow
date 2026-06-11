@@ -1,0 +1,88 @@
+@model DineFlow.Web.Models.InvoiceViewDto
+@{
+    ViewData["Title"]    = "Chi tiết hóa đơn";
+    ViewData["Subtitle"] = $"Hóa đơn — Bàn {Model.TableNumber} | {Model.PaidAt:HH:mm dd/MM/yyyy}";
+
+    var payLabel = Model.PaymentMethod switch
+    {
+        0 => "💵 Tiền mặt",
+        1 => "🏦 Chuyển khoản ngân hàng",
+        2 => "💳 Thẻ tín dụng/ghi nợ",
+        _ => Model.PaymentMethodDisplay
+    };
+}
+
+<div style="max-width:480px;margin:0 auto;">
+    <!-- Receipt Card -->
+    <div style="background:var(--bg-secondary);border-radius:20px;border:1px solid var(--border);overflow:hidden;">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#6366f1,#818cf8);padding:32px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:8px;">🧾</div>
+            <h2 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 4px;">DineFlow</h2>
+            <p style="color:rgba(255,255,255,.7);margin:0;font-size:13px;">Hóa đơn thanh toán</p>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:28px;">
+            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Số bàn:</span>
+                    <strong>Bàn @Model.TableNumber</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Thu ngân:</span>
+                    <span>@Model.CashierName</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Thời gian:</span>
+                    <span>@Model.PaidAt.ToString("HH:mm — dd/MM/yyyy")</span>
+                </div>
+            </div>
+
+            <div style="border-top:1px dashed var(--border);padding-top:20px;margin-bottom:20px;">
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Tạm tính:</span>
+                        <span>@Model.SubTotal.ToString("N0") ₫</span>
+                    </div>
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="color:#ef4444;">Giảm giá:</span>
+                            <span style="color:#ef4444;">-@Model.DiscountAmount.ToString("N0") ₫</span>
+                        </div>
+                    }
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Thuế (8%):</span>
+                        <span>@Model.TaxAmount.ToString("N0") ₫</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);
+                       border-radius:12px;padding:16px;display:flex;justify-content:space-between;
+                       align-items:center;margin-bottom:20px;">
+                <span style="font-weight:700;font-size:16px;">TỔNG THANH TOÁN</span>
+                <span style="font-size:24px;font-weight:800;color:#10b981;">
+                    @Model.Total.ToString("N0") ₫
+                </span>
+            </div>
+
+            <div style="text-align:center;padding:12px;background:var(--bg-primary);border-radius:10px;
+                       font-size:13px;color:var(--text-muted);">
+                @payLabel
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="border-top:1px solid var(--border);padding:20px;text-align:center;">
+            <p style="color:var(--text-muted);font-size:12px;margin:0 0 16px;">
+                Cảm ơn quý khách! Hẹn gặp lại 🙏
+            </p>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <a href="/Invoices" class="btn btn-secondary">← Danh sách hóa đơn</a>
+                <a href="/Orders" class="btn btn-primary">📋 Đơn hàng</a>
+            </div>
+        </div>
+    </div>
+</div>

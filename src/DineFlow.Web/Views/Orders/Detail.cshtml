@@ -1,0 +1,178 @@
+@model DineFlow.Web.Models.OrderDetailViewModel
+@{
+    var order = Model.Order;
+    ViewData["Title"]    = $"Đơn hàng — Bàn {order.TableNumber}";
+    ViewData["Subtitle"] = $"Chi tiết đơn | {order.StaffName} | {order.CreatedAt:HH:mm dd/MM/yyyy}";
+
+    var (badgeColor, badgeBg) = order.Status switch
+    {
+        0 => ("#f59e0b", "rgba(245,158,11,0.15)"),
+        1 => ("#3b82f6", "rgba(59,130,246,0.15)"),
+        2 => ("#10b981", "rgba(16,185,129,0.15)"),
+        3 => ("#6366f1", "rgba(99,102,241,0.15)"),
+        4 => ("#ef4444", "rgba(239,68,68,0.15)"),
+        _ => ("var(--text-muted)", "transparent")
+    };
+}
+
+<div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;">
+
+    <!-- Left: Order Items -->
+    <div>
+        <div class="card" style="background:var(--bg-secondary);border-radius:16px;border:1px solid var(--border);padding:24px;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                <h3 style="font-size:16px;font-weight:700;margin:0;">🍽️ Món đã order</h3>
+                <span style="font-size:12px;font-weight:600;color:@badgeColor;
+                             background:@badgeBg;border-radius:20px;padding:4px 14px;">
+                    @order.StatusDisplay
+                </span>
+            </div>
+
+            @if (!order.Items.Any())
+            {
+                <p style="color:var(--text-muted);text-align:center;padding:24px 0;">Chưa có món nào trong đơn.</p>
+            }
+            else
+            {
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    @foreach (var item in order.Items)
+                    {
+                        <div style="display:flex;align-items:center;gap:16px;padding:12px;
+                                   background:var(--bg-primary);border-radius:10px;">
+                            <div style="flex:1;">
+                                <div style="font-weight:600;">@item.MenuItemName</div>
+                                @if (!string.IsNullOrEmpty(item.Note))
+                                {
+                                    <div style="font-size:12px;color:var(--text-muted);">📝 @item.Note</div>
+                                }
+                                <div style="font-size:13px;color:var(--text-muted);">
+                                    @item.UnitPrice.ToString("N0") ₫ × @item.Quantity
+                                </div>
+                            </div>
+                            <div style="font-weight:700;color:var(--accent);">
+                                @item.SubTotal.ToString("N0") ₫
+                            </div>
+                            @if (order.Status == 0) // Pending — có thể xóa món
+                            {
+                                <form asp-action="RemoveItem" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderId"     value="@order.Id" />
+                                    <input type="hidden" name="orderItemId" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            title="Xóa món" style="padding:6px 10px;">✕</button>
+                                </form>
+                            }
+                        </div>
+                    }
+                </div>
+                <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:16px;
+                            display:flex;justify-content:space-between;font-size:18px;font-weight:700;">
+                    <span>Tổng cộng:</span>
+                    <span style="color:var(--accent);">@order.TotalAmount.ToString("N0") ₫</span>
+                </div>
+            }
+        </div>
+
+        <!-- Add Item Form (chỉ khi Pending) -->
+        @if (order.Status == 0)
+        {
+            <div class="card" style="background:var(--bg-secondary);border-radius:16px;border:1px solid var(--border);padding:24px;">
+                <h3 style="font-size:16px;font-weight:700;margin:0 0 16px;">➕ Thêm món</h3>
+                <form asp-action="AddItem" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="OrderId" value="@order.Id" />
+                    <div style="display:grid;grid-template-columns:1fr 80px;gap:12px;margin-bottom:12px;">
+                        <select name="MenuItemId" class="form-control" required>
+                            <option value="">-- Chọn món --</option>
+                            @foreach (var item in Model.MenuItems)
+                            {
+                                <option value="@item.Id">@item.Name — @item.Price.ToString("N0") ₫</option>
+                            }
+                        </select>
+                        <input type="number" name="Quantity" class="form-control" value="1" min="1" max="99" />
+                    </div>
+                    <div style="display:flex;gap:12px;">
+                        <input type="text" name="Note" class="form-control" placeholder="Ghi chú (tùy chọn)" />
+                        <button type="submit" class="btn btn-primary" id="btn-add-item" style="white-space:nowrap;">
+                            Thêm món
+                        </button>
+                    </div>
+                </form>
+            </div>
+        }
+    </div>
+
+    <!-- Right: Actions -->
+    <div>
+        <div class="card" style="background:var(--bg-secondary);border-radius:16px;border:1px solid var(--border);padding:24px;">
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 8px;">📋 Thông tin đơn</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Bàn:</span>
+                    <strong>Bàn @order.TableNumber (Tầng @order.FloorNumber)</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Nhân viên:</span>
+                    <span>@order.StaffName</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Tạo lúc:</span>
+                    <span>@order.CreatedAt.ToString("HH:mm dd/MM")</span>
+                </div>
+            </div>
+
+            <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;color:var(--text-muted);">Cập nhật trạng thái</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                @if (order.Status == 0) // Pending → Preparing
+                {
+                    <form asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id"        value="@order.Id" />
+                        <input type="hidden" name="newStatus" value="1" />
+                        <button type="submit" class="btn btn-primary" id="btn-preparing" style="width:100%;">
+                            👨‍🍳 Xác nhận — Đang làm
+                        </button>
+                    </form>
+                }
+                @if (order.Status == 1) // Preparing → Served
+                {
+                    <form asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id"        value="@order.Id" />
+                        <input type="hidden" name="newStatus" value="2" />
+                        <button type="submit" class="btn" id="btn-served"
+                                style="width:100%;background:rgba(16,185,129,.15);color:#10b981;
+                                       border:1px solid rgba(16,185,129,.3);">
+                            🍽️ Đã mang ra bàn
+                        </button>
+                    </form>
+                }
+                @if (order.Status == 2) // Served → Pay
+                {
+                    <a href="/Invoices/Create/@order.Id" class="btn" id="btn-pay"
+                       style="width:100%;text-align:center;background:rgba(99,102,241,.15);
+                              color:#818cf8;border:1px solid rgba(99,102,241,.3);">
+                        💳 Thanh toán
+                    </a>
+                }
+                @if (order.Status == 0 || order.Status == 1)
+                {
+                    <form asp-action="Cancel" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@order.Id" />
+                        <button type="submit" class="btn btn-danger" id="btn-cancel-order" style="width:100%;"
+                                onclick="return confirm('Xác nhận hủy đơn hàng này?')">
+                            ✕ Hủy đơn
+                        </button>
+                    </form>
+                }
+            </div>
+
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                <a href="/Orders" class="btn btn-secondary" style="width:100%;text-align:center;">
+                    ← Quay lại danh sách
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
