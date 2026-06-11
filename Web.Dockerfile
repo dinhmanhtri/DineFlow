@@ -38,8 +38,8 @@ RUN dotnet publish src/DineFlow.Web/DineFlow.Web.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
-USER appuser
+# Sử dụng non-root user 'app' có sẵn của .NET 8+ / 10.0
+USER app
 
 COPY --from=build /app/publish .
 

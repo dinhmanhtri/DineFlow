@@ -40,9 +40,8 @@ RUN dotnet publish src/DineFlow.API/DineFlow.API.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-# [KIẾN THỨC] Non-root user: chạy app với user ít quyền hơn → security best practice
-RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
-USER appuser
+# Sử dụng non-root user 'app' có sẵn của .NET 8+ / 10.0
+USER app
 
 # Copy chỉ publish output từ stage 1
 COPY --from=build /app/publish .
