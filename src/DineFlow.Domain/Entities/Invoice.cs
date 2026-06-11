@@ -50,7 +50,7 @@ public class Invoice : BaseEntity
     /// Factory method — tạo Invoice từ Order với business rules
     /// Thay vì để Service tính toán ngoài, logic tính giá nằm trong Domain
     /// </summary>
-    public static Invoice CreateFromOrder(Order order, decimal discountAmount, Guid cashierId)
+    public static Invoice CreateFromOrder(Order order, decimal discountAmount, Guid cashierId, PaymentMethod paymentMethod = PaymentMethod.Cash)
     {
         var subTotal = order.TotalAmount;
         var tax = Math.Round((subTotal - discountAmount) * 0.10m, 2);  // VAT 10%
@@ -63,6 +63,7 @@ public class Invoice : BaseEntity
             DiscountAmount = discountAmount,
             TaxAmount      = tax,
             Total          = total,
+            PaymentMethod  = paymentMethod,
             PaidAt         = DateTime.UtcNow,
             CashierId      = cashierId
         };

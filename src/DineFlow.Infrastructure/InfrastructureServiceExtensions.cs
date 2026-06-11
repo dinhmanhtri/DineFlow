@@ -1,5 +1,8 @@
+using AutoMapper;
 using DineFlow.Application.Interfaces;
 using DineFlow.Application.Interfaces.Services;
+using DineFlow.Application.Mappings;
+using DineFlow.Application.Services;
 using DineFlow.Infrastructure.Data;
 using DineFlow.Infrastructure.Services;
 using DineFlow.Infrastructure.UnitOfWork;
@@ -62,12 +65,33 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<IConnectionMultiplexer>(sp =>
             ConnectionMultiplexer.Connect(redisConnectionString));
 
-        // ===== Application Services =====
+        // ===== Infrastructure Services =====
         services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
         services.AddScoped<ICacheService, RedisCacheService>();
 
+        // ===== Application Services =====
+        // [KIẼN THỨC] AddScoped: 1 instance per HTTP request
+        // Service nhận IUnitOfWork (Scoped) → phải cùng lifetime (không được Singleton)
+        services.AddScoped<IMenuService, MenuService>();
+        services.AddScoped<ITableService, TableService>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IInvoiceService, InvoiceService>();
+        services.AddScoped<IDashboardService, DashboardService>();
+
+        // ===== AutoMapper v16+ =====
+        // [KIẾN THỨC] AutoMapper v16: AddAutoMapper(Assembly) không còn cần package riêng
+        // Dùng overload với Action<cfg> để explicitly add từng profile
+        services.AddAutoMapper(cfg =>
+        {
+            cfg.AddProfile<MenuMappingProfile>();
+            cfg.AddProfile<TableMappingProfile>();
+            cfg.AddProfile<OrderMappingProfile>();
+            cfg.AddProfile<InvoiceMappingProfile>();
+        });
+
         return services;
     }
+
 
     /// <summary>
     /// Tự động chạy migrations và seed data khi app start

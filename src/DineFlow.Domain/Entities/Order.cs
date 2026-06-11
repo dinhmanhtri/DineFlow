@@ -80,6 +80,21 @@ public class Order : BaseEntity
     public bool CanBeCancelled() =>
         Status == OrderStatus.Pending || Status == OrderStatus.Preparing;
 
+    /// <summary>
+    /// Xóa món khỏi order — validate business rules
+    /// </summary>
+    public void RemoveItem(Guid orderItemId)
+    {
+        if (Status != OrderStatus.Pending && Status != OrderStatus.Preparing)
+            throw new InvalidOperationException("Không thể xóa món khi order đã hoàn tất hoặc bị hủy.");
+
+        var item = OrderItems.FirstOrDefault(x => x.Id == orderItemId)
+            ?? throw new InvalidOperationException($"OrderItem '{orderItemId}' không thuộc order này.");
+
+        OrderItems.Remove(item);
+        RecalculateTotal();
+    }
+
     public void Cancel()
     {
         if (!CanBeCancelled())

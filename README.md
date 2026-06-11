@@ -98,8 +98,8 @@ dotnet run --project src/DineFlow.Web
 |---|---|---|
 | Phase 1 | ✅ Done | Solution Setup + Domain Layer |
 | Phase 2 | ✅ Done | Infrastructure: EF Core, Repository, Redis |
-| Phase 3 | 🔄 In Progress | Application Services + DTOs |
-| Phase 4 | ⬜ Todo | Web API + JWT + Swagger |
+| Phase 3 | ✅ Done | Application Services + DTOs + AutoMapper |
+| Phase 4 | 🔄 In Progress | Web API + JWT + Swagger |
 | Phase 5 | ⬜ Todo | MVC Razor Views |
 | Phase 6 | ⬜ Todo | Docker + Docker Compose |
 | Phase 7 | ⬜ Todo | CI/CD GitHub Actions |
