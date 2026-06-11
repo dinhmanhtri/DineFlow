@@ -23,7 +23,6 @@ COPY src/DineFlow.Application/DineFlow.Application.csproj     src/DineFlow.Appli
 COPY src/DineFlow.Infrastructure/DineFlow.Infrastructure.csproj src/DineFlow.Infrastructure/
 COPY src/DineFlow.API/DineFlow.API.csproj                     src/DineFlow.API/
 COPY src/DineFlow.Web/DineFlow.Web.csproj                     src/DineFlow.Web/
-COPY tests/DineFlow.UnitTests/DineFlow.UnitTests.csproj       tests/DineFlow.UnitTests/
 
 # Restore packages (layer này được cache nếu .csproj không đổi)
 RUN dotnet restore src/DineFlow.API/DineFlow.API.csproj
