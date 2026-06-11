@@ -117,7 +117,7 @@ dotnet run --project src/DineFlow.Web
 | Phase 4 | ✅ Done | Web API + JWT + Swagger + Global Error Handler |
 | Phase 5 | ✅ Done | Redis Cache + Docker Compose + Health Checks |
 | Phase 6 | ✅ Done | MVC Razor Views — Menu Management UI (Login, Dashboard, CRUD) |
-| Phase 7 | ⏳ Next | Dockerfile + CI/CD GitHub Actions |
+| Phase 7 | ✅ Done | Dockerfile + CI/CD GitHub Actions (ghcr.io) |
 
 ---
 
